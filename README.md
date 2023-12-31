@@ -52,6 +52,10 @@ yarn start
 ```
 This will start the local development server and open a browser on http://localhost:9000 
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/lowcoder-org/lowcoder-media-assets/main/images/Component%20Plugin%20Builder%20%7C%20Preview.png" />
+</p>
+
 ## Local development
 
 After the preparation, a skeleton project for Lowcoder Component Plugin development was created and the SDK prepared.
@@ -91,5 +95,11 @@ yarn build --publish
 In the Lowcoder Editor users can now "import" and directly use your plugin.
 To do so, they click in the right components panel "**Insert > Extensions > Add npm plugin**". 
 Now the can input your npm package's URL or name, which installs the component plugin for their app. And then they can use your  components plugin already.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/lowcoder-org/lowcoder-media-assets/main/images/App%20Editor%20%7C%20Import%20Componets%20Plugin.png" />
+  <img src="https://raw.githubusercontent.com/lowcoder-org/lowcoder-media-assets/main/images/App%20Editor%20%7C%20Import%20Componets%20Plugin%20from%20NPM.png" />
+
+</p>
 
 More information: https://docs.lowcoder.cloud/lowcoder-documentation/lowcoder-extension/develop-ui-components-for-apps#import-plugins
