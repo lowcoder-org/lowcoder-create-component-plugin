@@ -33,7 +33,7 @@ git@github.com:<your org>/lowcoder-create-component-plugin.git
 ```bash
 yarn install
 ```
-2) execute the Plugin Builder Script. PLease name your plugin with the prefix **"lowcoder-comp-"** to make it easy for other users to find Lowcoder Component Pluins on NPM
+2) execute the Plugin Builder Script. Please name your plugin with the prefix **"lowcoder-comp-"** to make it easy for other users to find Lowcoder Component Pluins on NPM
 
 ```bash
 npm create lowcoder-plugin lowcoder-comp-my-plugin
@@ -46,8 +46,7 @@ cd lowcoder-comp-my-plugin
 ```bash
 yarn install
 ```
-Now you can start your Plugin in the playground, so during development you have a realtime preview.
-5) install all dependencies:
+5) Start the Playground (Components Preview): Now you can start your Plugin in the playground, so during development you have a realtime preview.
 ```bash
 yarn start
 ```
