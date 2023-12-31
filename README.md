@@ -20,11 +20,11 @@ To ensure you can develop your Component Plugin including as your repository, pl
 Now you can clone your new repository to develop local.
 
 ```bash
-https://github.com/lowcoder-org/lowcoder-create-component-plugin.git
+https://github.com/<your org>/lowcoder-create-component-plugin.git
 
 or 
 
-git@github.com:lowcoder-org/lowcoder-create-component-plugin.git
+git@github.com:<your org>/lowcoder-create-component-plugin.git
 ```
 
 ### Local Development preparation
