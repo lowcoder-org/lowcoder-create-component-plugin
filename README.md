@@ -6,10 +6,10 @@ This script helps you to create a skeleton Lowcoder Component, which you can the
 
 The main steps are:
 
-- Fork of the repository
-- Local installation
-- Developing & preview the Component 
-- Publish the component
+- Fork of this Repository
+- Local installation & preparation
+- Developing & preview the Components
+- Publish the Components
 
 ### Forking of the Repository
 
@@ -85,3 +85,11 @@ With the following command you can publish the script to the NPM repository:
 ```bash
 yarn build --publish
 ```
+
+## Using the plugin
+
+In the Lowcoder Editor users can now "import" and directly use your plugin.
+To do so, they click in the right components panel "**Insert > Extensions > Add npm plugin**". 
+Now the can input your npm package's URL or name, which installs the component plugin for their app. And then they can use your  components plugin already.
+
+More information: https://docs.lowcoder.cloud/lowcoder-documentation/lowcoder-extension/develop-ui-components-for-apps#import-plugins
