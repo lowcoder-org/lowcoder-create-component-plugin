@@ -28,8 +28,9 @@ function Chart(props) {
           this.chart_width = chart_width;
           this.items = items;
       
-          this.svg = d3.select(DOM.svg(this.chart_width, this.chart_height));
+          this.svg = d3.select(DOM.svg(this.chart_width, this.chart_height)).attr('viewBox', `-20 -20 ${this.chart_width + 80} ${this.chart_height + 20}`);
         }
+        
       
         render() {
           const xScale = d3
@@ -53,6 +54,29 @@ function Chart(props) {
             .x(d => xScale(d.x))
             .y(d => yScale(d.y));
       
+           // MIDDLE LINE
+           this.svg
+           .append('line')
+           .attr('class', 'middle')
+           .attr('x1', xScale(50))
+           .attr('y1', yScale(0))
+           .attr('x2', xScale(50))
+           .attr('y2', yScale(100))
+           .attr('stroke', '#dddddd')
+           .attr('stroke-width', 1)
+           .attr('stroke-dasharray', 10);
+     
+         // BOTTOM AXIS
+         this.svg
+           .append('line')
+           .attr('class', 'middle')
+           .attr('x1', xScale(0))
+           .attr('y1', yScale(-5))
+           .attr('x2', xScale(100))
+           .attr('y2', yScale(-5))
+           .attr('stroke', '#dddddd')
+           .attr('stroke-width', 1);
+
           this.svg
             .append('path')
             .attr('class', 'line')
@@ -120,19 +144,8 @@ function Chart(props) {
             .append('text')
             .attr('style', 'font-family: Tahoma; font-size: 14px;')
             .text(d => d.description)
-            .attr('x', 22)
+            .attr('x', 25)
             .attr('y', 5);
-      
-          // BOTTOM AXIS
-          this.svg
-            .append('line')
-            .attr('class', 'middle')
-            .attr('x1', xScale(0))
-            .attr('y1', yScale(-5))
-            .attr('x2', xScale(100))
-            .attr('y2', yScale(-5))
-            .attr('stroke', '#dddddd')
-            .attr('stroke-width', 1);
       
           // AXIS LABELS
           this.svg
@@ -141,7 +154,7 @@ function Chart(props) {
             .attr('style', 'font-family: Tahoma; font-size: 14px;')
             .attr('fill', '#999999')
             .text('FIGURING THINGS OUT')
-            .attr('x', xScale(15))
+            .attr('x', xScale(0))
             .attr('y', this.chart_height - 5);
       
           this.svg
@@ -152,27 +165,16 @@ function Chart(props) {
             .text('MAKING IT HAPPEN')
             .attr('x', xScale(70))
             .attr('y', this.chart_height - 5);
-      
-          // MIDDLE LINE
-          this.svg
-            .append('line')
-            .attr('class', 'middle')
-            .attr('x1', xScale(50))
-            .attr('y1', yScale(0))
-            .attr('x2', xScale(50))
-            .attr('y2', yScale(100))
-            .attr('stroke', '#dddddd')
-            .attr('stroke-width', 1)
-            .attr('stroke-dasharray', 10);
-      
+    
+
           return this.svg.node();
         }
       };
     });
 
     // Attach an observer only to the chart rendering part
-    main.variable(observer('chart')).define(['HillChart', 'width', 'height', 'data'], function(HillChart, width, height, data) {
-      return new HillChart(width, height, data).render();
+    main.variable(observer('chart')).define(['HillChart', 'height', 'width', 'data'], function(HillChart, height, width, data) {
+      return new HillChart(height, width, data).render();
     });
 
     return main;
@@ -196,6 +198,7 @@ function Chart(props) {
 
   return <div ref={useChartRef} style={{ height: "100%" }} />;
 }
+
 
 Chart.propTypes = {
   width: PropTypes.number,

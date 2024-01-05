@@ -25,7 +25,6 @@ export const en = {
     "textSize": "Text Size"
   },
   "component": {
-    "delete": "Delete",
-    "data": "Data",
+    "data": "Hillchart Data",
   },
 };
