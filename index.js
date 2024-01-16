@@ -147,10 +147,10 @@ async function createProject(projectName, options) {
   await install([
     cliPackageName,
     sdkPackageName,
-    "react@17",
-    "react-dom@17",
-    "@types/react@17",
-    "@types/react-dom@17",
+    "react@18",
+    "react-dom@18",
+    "@types/react@18",
+    "@types/react-dom@18",
     "vite",
   ]);
 
