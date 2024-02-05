@@ -15,7 +15,8 @@ import {
   ScannerEventHandlerControl,
   disabledPropertyView,
   StringControl,
-  styled
+  styled,
+  valueComp,
 } from "lowcoder-sdk";
 
 import styles from "./styles.module.css";
@@ -89,21 +90,22 @@ let ScanappCompBase = (function () {
     maskClosable: withDefault(BoolControl, true),
     scannerActiveText: withDefault(StringControl, trans("component.activeText")),
     scannerInactiveText: withDefault(StringControl, trans("component.inactiveText")),
+    activeScanner: valueComp<boolean>(false),
   };
   
   return new UICompBuilder(childrenMap, (props) => {
 
     const qrcodeRegionId = "html5qr-code-scanner";
-    const continuousValue = useRef([]);
     const [isScannerActive, setIsScannerActive] = useState(false);
+    const activeScanner = props.activeScanner;
 
-    const startScanner = () => {
-      setIsScannerActive(true);
-      continuousValue.current = [];
+    const toggleScanner = (active: boolean) => {
+      setIsScannerActive(active);
     }
-    const stopScanner = () => {
-      setIsScannerActive(false);
-    }
+
+    useEffect(() => {
+     toggleScanner(activeScanner);
+    }, [activeScanner]);
 
     const scannerConfig = (props: { fps: number; qrbox: number; aspectRatio: number; disableFlip: boolean; facingMode : string}) => {
       let config : Html5QrcodeCameraScanConfig = {
@@ -175,14 +177,14 @@ let ScanappCompBase = (function () {
           <div style={{ textAlign: "center", width: "100%", margin: "10px auto" }}>
             <button style={{ marginLeft: "auto", marginRight: "auto" }} onClick={() => {
                 props.onEvent("click");
-                startScanner();
+                toggleScanner(true);
               }} 
               disabled={props.disabled}>
               <span>{props.scannerActiveText}</span>
             </button>
             <button style={{ textAlign: "center" }} onClick={() => {
                 props.onEvent("click");
-                stopScanner();
+                toggleScanner(false);
               }} 
               disabled={props.disabled}>
               <span>{props.scannerInactiveText}</span>
@@ -218,6 +220,29 @@ ScanappCompBase = class extends ScanappCompBase {
     return this.children.autoHeight.getView();
   }
 };
+
+ScanappCompBase = withMethodExposing(ScanappCompBase, [
+  {
+    method: {
+      name: trans("component.activeText"),
+      description: trans("component.activeText"),
+      params: [{}],
+    },
+    execute: (comp: any) => {
+      comp.children.activeScanner.dispatchChangeValueAction(true);
+    }
+  },
+  {
+    method: {
+      name: trans("component.inactiveText"),
+      description: trans("component.inactiveText"),
+      params: [{}],
+    },
+    execute: (comp: any) => {
+      comp.children.activeScanner.dispatchChangeValueAction(false);
+    }
+  },
+]);
 
 export default withExposingConfigs(ScanappCompBase, [
   new NameConfig("data", trans("component.data")),
