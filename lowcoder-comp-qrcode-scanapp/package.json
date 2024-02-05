@@ -1,0 +1,36 @@
+{
+  "name": "lowcoder-comp-qrcode-scanapp",
+  "version": "0.0.2",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "18",
+    "@types/react-dom": "18",
+    "html5-qrcode": "^2.3.8",
+    "lowcoder-cli": "^0.0.30",
+    "lowcoder-sdk": "^2.3.1",
+    "react": "18",
+    "react-dom": "18",
+    "typescript": "5.3.3",
+    "vite": "^5.0.12"
+  },
+  "lowcoder": {
+    "description": "QR Code Scan Cpmponent",
+    "comps": {
+      "qrscanapp": {
+        "name": "QR Code Scan Component",
+        "icon": "./icons/icon-qrcode.svg",
+        "description": "A Component Plugin to enable QR & Barcode Code Scan by ScanApp",
+        "layoutInfo": {
+          "w": 6,
+          "h": 30
+        }
+      }
+    }
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "lowcoder-cli build",
+    "build_publish": "lowcoder-cli build --publish"
+  }
+}
