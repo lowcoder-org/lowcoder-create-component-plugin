@@ -24,8 +24,8 @@ import styles from "./styles.module.css";
 
 import { i18nObjs, trans } from "./i18n/comps";
 
-import { useState, useEffect, useRef, JSXElementConstructor, ReactElement, ReactNode, ReactPortal } from "react";
-import { Html5QrcodeScanner, QrcodeErrorCallback, QrcodeSuccessCallback, Html5QrcodeCameraScanConfig } from 'html5-qrcode';
+import { useState, useEffect, useRef } from "react";
+import { Html5QrcodeScanner, QrcodeErrorCallback, QrcodeSuccessCallback, Html5QrcodeCameraScanConfig, Html5QrcodeScannerState } from 'html5-qrcode';
 
 export const CompStyles = [
   {	
@@ -85,72 +85,85 @@ let ScanappCompBase = (function () {
     styles: styleControl(CompStyles),
     autoHeight: withDefault(AutoHeightControl, "auto"),
     onEvent: ScannerEventHandlerControl,
-    continuous: BoolControl, 
-    uniqueData: withDefault(BoolControl, true),
     showButtons: withDefault(BoolControl, true),
     disabled: BoolCodeControl,
     scannerActiveText: withDefault(StringControl, trans("component.activeText")),
     scannerInactiveText: withDefault(StringControl, trans("component.inactiveText")),
-    activeScanner: valueComp(false),
+    scannerState: withDefault(StringControl, ""),
   };
-  
+
   return new UICompBuilder(childrenMap, (props) => {
 
+    const scannerRef = useRef<Html5QrcodeScanner | null>(null);
     const qrcodeRegionId = "html5qr-code-scanner";
-    const [isScannerActive, setIsScannerActive] = useState(false);
-    const activeScanner = props.activeScanner;
-
     const continuousValue = useRef<string[]>([]);
+    const [scannerState, setScannerState] = useState("");
 
-    const toggleScanner = (active: boolean) => {
-      setIsScannerActive(active);
-      continuousValue.current = [];
+    const qrboxFunction = function(viewfinderWidth, viewfinderHeight) {
+      let minEdgePercentage = 0.7; // 70%
+      let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+      let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+      return {
+          width: qrboxSize,
+          height: qrboxSize
+      };
     }
-
-    useEffect(() => {
-     toggleScanner(activeScanner);
-    }, [activeScanner]);
 
     const scannerConfig = (props: { fps: number; qrbox: number; aspectRatio: number; disableFlip: boolean; facingMode : string}) => {
       let config : Html5QrcodeCameraScanConfig = {
         fps: props.fps,
-        qrbox: props.qrbox,
+        qrbox: qrboxFunction,
         aspectRatio: props.aspectRatio,
         disableFlip: props.disableFlip
       };
       return config;
     };
 
-    const Html5QrcodePlugin = (props: {
-      verbose: boolean; 
-      qrCodeSuccessCallback: QrcodeSuccessCallback; 
-      qrCodeErrorCallback: QrcodeErrorCallback;
-      fps: number;
-      qrbox: number;
-      aspectRatio: number;
-      disableFlip: boolean 
-      facingMode: string; }) => {
-
-      // we want to control when the scanner gets activated
-
-      let html5QrcodeScanner: Html5QrcodeScanner;
-
+    const Html5QrcodePlugin = (props) => {
+      
       useEffect(() => {
-        if (isScannerActive) {
-          const verbose = props.verbose === false;
-          const config = scannerConfig(props);
-          html5QrcodeScanner = new Html5QrcodeScanner(qrcodeRegionId, config, verbose);
-          html5QrcodeScanner.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback)
-        }
+        const verbose = props.verbose === false;
+        const config = scannerConfig(props);
+        scannerRef.current = new Html5QrcodeScanner(qrcodeRegionId, config, verbose);
         // cleanup function when component will unmount
         return () => {
-          if (html5QrcodeScanner) {
-            html5QrcodeScanner.clear().catch(error => {
+          if (scannerRef.current) {
+            scannerRef.current.clear().catch(error => {
               console.error("Failed to clear html5QrcodeScanner. ", error);
             });
           }
         };
-      }, [isScannerActive]);
+      }, []);
+
+      useEffect(() => {
+        // Reacting to scannerState changes
+        if (props.scannerState === "start") {
+          scannerRef.current?.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
+        }
+        else {
+          if (scannerRef && scannerRef.current.cameraScanImage !== null) {
+            if (props.scannerState === "stop") {
+              if (scannerRef && scannerRef.current?.getState() === Html5QrcodeScannerState.UNKNOWN || scannerRef.current?.getState() === Html5QrcodeScannerState.NOT_STARTED){
+                scannerRef.current.clear().catch(error => {
+                  console.error("Failed to clear html5QrcodeScanner. ", error);
+                });
+              }
+            } 
+            else if (props.scannerState === "resume") {
+              if (scannerRef && scannerRef?.current?.getState() === Html5QrcodeScannerState.PAUSED) {
+                scannerRef.current.resume();
+              }
+            }
+            else if (props.scannerState === "pause") {
+              console.log("pause");
+              if (scannerRef && scannerRef?.current?.getState() === Html5QrcodeScannerState.SCANNING) {
+                scannerRef.current.pause();
+              }
+            }
+          }
+        }
+        
+      }, [props.scannerState]);
 
       return (
         <>
@@ -159,46 +172,48 @@ let ScanappCompBase = (function () {
       );
     };
 
-    const onNewScanResult = (decodedText: any, decodedResult: any) => {
-      props.data.onChange(decodedResult);
-      props.onEvent("success");
-      if (props.continuous) {
-        continuousValue.current = [...continuousValue.current, decodedResult];
-        const val = props.uniqueData
-        ? Array.from(new Set(continuousValue.current))
-        : continuousValue.current;
-        props.data.onChange(val);
-      } else {
+    const onNewScanResult = async (decodedText: any, decodedResult: any) => {    
         props.data.onChange(decodedResult);
         props.onEvent("success");
+    };
+
+    const onErrorScanResult: QrcodeErrorCallback = (errorMessage: any) => {
+      // do nothing
+    };
+
+    const onStart = () => { 
+      scannerRef.current?.render(onNewScanResult, onErrorScanResult);
+    }
+    const onPause = () => { 
+      if (scannerRef && scannerRef.current.cameraScanImage !== null && scannerRef?.current?.getState() === Html5QrcodeScannerState.SCANNING) {
+        scannerRef.current.pause();
       }
-    };
-    const onErrorScanResult = (error: any) => {
-      // console.log("Scan error:", error);
-    };
+    }
 
     return (
       <ScannerStyle $style={props.styles}>
         <Html5QrcodePlugin
-          fps={10}
-          qrbox={250}
+          fps={props.fps}
+          qrbox={props.qrbox}
           facingMode={"environment"}
-          disableFlip={false}
+          disableFlip={props.disableFlip}
           qrCodeSuccessCallback={onNewScanResult}
-          qrCodeErrorCallback={onErrorScanResult} 
-          verbose={true} 
-          aspectRatio={0}/>
+          qrCodeErrorCallback={onErrorScanResult}
+          verbose={true}
+          aspectRatio={0} 
+          scannerState={props.scannerState}
+          setScannerState={setScannerState}/>
           <div style={{ textAlign: "center", width: "100%", margin: "10px auto" }}>
             {props.showButtons && 
               <><button style={{ marginLeft: "auto", marginRight: "auto" }} onClick={() => {
               props.onEvent("click");
-              toggleScanner(true);
+              onStart();
             } }
               disabled={props.disabled}>
               <span>{props.scannerActiveText}</span>
             </button><button style={{ textAlign: "center" }} onClick={() => {
               props.onEvent("click");
-              toggleScanner(false);
+              onPause();
             } }
               disabled={props.disabled}>
                 <span>{props.scannerInactiveText}</span>
@@ -224,11 +239,11 @@ let ScanappCompBase = (function () {
           {children.autoHeight.propertyView()}
           {children.showButtons.propertyView({ label: trans("component.showButtons") })}
         </Section>
-        <Section name={sectionNames.advanced}>
+        {/* <Section name={sectionNames.advanced}>
         {children.continuous.propertyView({ label: trans("component.continuous") })}
           {children.continuous.getView() &&
               children.uniqueData.propertyView({ label: trans("component.uniqueData") })}
-        </Section>
+        </Section> */}
         <Section name="Styles">
           {children.styles.getPropertyView()}
         </Section>
@@ -253,7 +268,7 @@ ScanappCompBase = withMethodExposing(ScanappCompBase, [
       params: [{}],
     },
     execute: (comp: any) => {
-      comp.children.activeScanner.dispatchChangeValueAction(true);
+      comp.children.scannerState.dispatchChangeValueAction("start");
     }
   },
   {
@@ -263,7 +278,17 @@ ScanappCompBase = withMethodExposing(ScanappCompBase, [
       params: [{}],
     },
     execute: (comp: any) => {
-      comp.children.activeScanner.dispatchChangeValueAction(false);
+      comp.children.scannerState.dispatchChangeValueAction("pause");
+    }
+  },
+  {
+    method: {
+      name: trans("component.stopText"),
+      description: trans("component.stopText"),
+      params: [{}],
+    },
+    execute: (comp: any) => {
+      comp.children.scannerState.dispatchChangeValueAction("stop");
     }
   },
 ]);
