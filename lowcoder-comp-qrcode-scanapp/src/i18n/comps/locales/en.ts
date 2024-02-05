@@ -28,6 +28,9 @@ export const en = {
     "data": "Scan Result Data",
     "activeText" : "Start Scanner",
     "inactiveText" : "Stop Scanner",
+    "continuous" : "Continuous Scanning",
+    "uniqueData" : "Output only Unique Code Results",
+    "showButtons" : "Show Scanner Control Buttons",
   },
   "methods": {
     "setPoint": "Set Point",

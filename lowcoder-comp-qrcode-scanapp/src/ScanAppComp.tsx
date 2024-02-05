@@ -17,13 +17,14 @@ import {
   StringControl,
   styled,
   valueComp,
+  sectionNames,
 } from "lowcoder-sdk";
 
 import styles from "./styles.module.css";
 
 import { i18nObjs, trans } from "./i18n/comps";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, JSXElementConstructor, ReactElement, ReactNode, ReactPortal } from "react";
 import { Html5QrcodeScanner, QrcodeErrorCallback, QrcodeSuccessCallback, Html5QrcodeCameraScanConfig } from 'html5-qrcode';
 
 export const CompStyles = [
@@ -67,14 +68,14 @@ export const CompStyles = [
 const ScannerStyle = styled.div`
   position: relative;
   z-index: 10;
-  font-size: ${(props) => props.$style.textSize};
+  font-size: ${(props: { $style: { textSize: string; }; }) => props.$style.textSize};
   color: rgba(0, 0, 0, 0.45);
   min-height: 250px;
-  margin: ${(props) => props.$style.margin};
-  padding: ${(props) => props.$style.padding};
-  background-color: ${(props) => props.$style.backgroundColor};
-  border: ${(props) => props.$style.borderWidth} solid ${(props) => props.$style.border} !important;
-  border-radius: ${(props) => props.$style.radius} !important;
+  margin: ${(props: { $style: { margin: string; }; }) => props.$style.margin};
+  padding: ${(props: { $style: { padding: string; }; }) => props.$style.padding};
+  background-color: ${(props: { $style: { backgroundColor: string; }; }) => props.$style.backgroundColor};
+  border: ${(props: { $style: { borderWidth: string; }; }) => props.$style.borderWidth} solid ${(props: { $style: { border: string; }; }) => props.$style.border} !important;
+  border-radius: ${(props: { $style: { radius: string; }; }) => props.$style.radius} !important;
 `;
 
 let ScanappCompBase = (function () {
@@ -84,13 +85,13 @@ let ScanappCompBase = (function () {
     styles: styleControl(CompStyles),
     autoHeight: withDefault(AutoHeightControl, "auto"),
     onEvent: ScannerEventHandlerControl,
-    continuous: BoolControl,
+    continuous: BoolControl, 
     uniqueData: withDefault(BoolControl, true),
+    showButtons: withDefault(BoolControl, true),
     disabled: BoolCodeControl,
-    maskClosable: withDefault(BoolControl, true),
     scannerActiveText: withDefault(StringControl, trans("component.activeText")),
     scannerInactiveText: withDefault(StringControl, trans("component.inactiveText")),
-    activeScanner: valueComp<boolean>(false),
+    activeScanner: valueComp(false),
   };
   
   return new UICompBuilder(childrenMap, (props) => {
@@ -99,8 +100,11 @@ let ScanappCompBase = (function () {
     const [isScannerActive, setIsScannerActive] = useState(false);
     const activeScanner = props.activeScanner;
 
+    const continuousValue = useRef<string[]>([]);
+
     const toggleScanner = (active: boolean) => {
       setIsScannerActive(active);
+      continuousValue.current = [];
     }
 
     useEffect(() => {
@@ -158,6 +162,16 @@ let ScanappCompBase = (function () {
     const onNewScanResult = (decodedText: any, decodedResult: any) => {
       props.data.onChange(decodedResult);
       props.onEvent("success");
+      if (props.continuous) {
+        continuousValue.current = [...continuousValue.current, decodedResult];
+        const val = props.uniqueData
+        ? Array.from(new Set(continuousValue.current))
+        : continuousValue.current;
+        props.data.onChange(val);
+      } else {
+        props.data.onChange(decodedResult);
+        props.onEvent("success");
+      }
     };
     const onErrorScanResult = (error: any) => {
       // console.log("Scan error:", error);
@@ -175,37 +189,47 @@ let ScanappCompBase = (function () {
           verbose={true} 
           aspectRatio={0}/>
           <div style={{ textAlign: "center", width: "100%", margin: "10px auto" }}>
-            <button style={{ marginLeft: "auto", marginRight: "auto" }} onClick={() => {
-                props.onEvent("click");
-                toggleScanner(true);
-              }} 
+            {props.showButtons && 
+              <><button style={{ marginLeft: "auto", marginRight: "auto" }} onClick={() => {
+              props.onEvent("click");
+              toggleScanner(true);
+            } }
               disabled={props.disabled}>
               <span>{props.scannerActiveText}</span>
-            </button>
-            <button style={{ textAlign: "center" }} onClick={() => {
-                props.onEvent("click");
-                toggleScanner(false);
-              }} 
+            </button><button style={{ textAlign: "center" }} onClick={() => {
+              props.onEvent("click");
+              toggleScanner(false);
+            } }
               disabled={props.disabled}>
-              <span>{props.scannerInactiveText}</span>
-            </button>
+                <span>{props.scannerInactiveText}</span>
+              </button></>
+            }
           </div>
       </ScannerStyle>
     );
   })
+
   .setPropertyViewFn((children: any) => {
     return (
       <>
-        <Section name="Basic">
-          {children.data.propertyView({ label: "Data" })}
+        <Section name={sectionNames.basic}>
+          
         </Section>
-        <Section name="Interaction">
+        <Section name={sectionNames.interaction}>
           {children.onEvent.propertyView()}
           {disabledPropertyView(children)}
           {hiddenPropertyView(children)}
         </Section>
+        <Section name={sectionNames.layout}>
+          {children.autoHeight.propertyView()}
+          {children.showButtons.propertyView({ label: trans("component.showButtons") })}
+        </Section>
+        <Section name={sectionNames.advanced}>
+        {children.continuous.propertyView({ label: trans("component.continuous") })}
+          {children.continuous.getView() &&
+              children.uniqueData.propertyView({ label: trans("component.uniqueData") })}
+        </Section>
         <Section name="Styles">
-          {children.autoHeight.getPropertyView()}
           {children.styles.getPropertyView()}
         </Section>
       </>

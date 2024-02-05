@@ -1,6 +1,6 @@
 {
   "name": "lowcoder-comp-qrcode-scanapp",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "license": "MIT",
   "dependencies": {
@@ -21,6 +21,7 @@
         "name": "QR Code Scan Component",
         "icon": "./icons/icon-qrcode.svg",
         "description": "A Component Plugin to enable QR & Barcode Code Scan by ScanApp",
+        "category": "itemHandling",
         "layoutInfo": {
           "w": 6,
           "h": 30
