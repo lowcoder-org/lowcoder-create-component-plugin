@@ -32,6 +32,11 @@ export const en = {
     "continuous" : "Continuous Scanning",
     "uniqueData" : "Output only Unique Code Results",
     "showButtons" : "Show Scanner Control Buttons",
+    "interval" : "Retry Interval (ms)",
+    "devices" : "Camera Devices",
+    "scannerDevice" : "Camera Device",
+    "setScannerDevice" : "Set Camera Device",
+    "checkDevices" : "Check Camera Devices",
   },
   "methods": {
     "setPoint": "Set Point",

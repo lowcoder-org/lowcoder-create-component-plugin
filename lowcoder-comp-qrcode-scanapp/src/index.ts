@@ -1,5 +1,5 @@
-import ScanappComp from "./ScanAppComp";
+import ZxingScanAppComp from "./ZxingScanAppComp";
 
 export default {
-  qrscanapp: ScanappComp
+  zxingqrscanapp: ZxingScanAppComp
 };

@@ -1,6 +1,6 @@
 {
   "name": "lowcoder-comp-qrcode-scanapp",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "type": "module",
   "license": "MIT",
   "dependencies": {
@@ -11,16 +11,18 @@
     "lowcoder-sdk": "^2.3.1",
     "react": "18",
     "react-dom": "18",
+    "react-media-devices": "^1.1.5",
+    "react-zxing": "^2.0.0",
     "typescript": "5.3.3",
     "vite": "^5.0.12"
   },
   "lowcoder": {
     "description": "QR Code Scan Cpmponent",
     "comps": {
-      "qrscanapp": {
-        "name": "QR Code Scan Component",
+      "zxingqrscanapp": {
+        "name": "Zxing QR Code Scan Component",
         "icon": "./icons/icon-qrcode.svg",
-        "description": "A Component Plugin to enable QR & Barcode Code Scan by ScanApp",
+        "description": "A Component Plugin to enable QR & Barcode Code Scan by Zxing",
         "category": "itemHandling",
         "layoutInfo": {
           "w": 6,
