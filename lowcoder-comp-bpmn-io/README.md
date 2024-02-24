@@ -11,3 +11,12 @@ Edit properties explained:
 * **Download Name**: The name of the image to download
 * **onChange**: This event triggers in designer mode when the xml has changed. You can access the changed xml by referencing `.xml` of the component
 * **Show BPMN.io logo**: You can turn of the BPMN.io logo, but make sure your are [entitled](https://forum.bpmn.io/t/license-questions/85)
+
+# Example
+To help you with understanding how you can use this plugin we have added an [example application](https://github.com/sjhoeksma/lowcoder-create-component-plugin/blob/lowcoder-comp-bpmn-io/lowcoder-comp-bpmn-io/examples/lowcoder-comp-bpmn-io.json?raw=true). Just download the json application file and import it within lowcoder. The two images below show the difference between designer and viewer. Within the viewer you see the variable replacement working. 
+
+#### Designer 
+![designer](https://github.com/sjhoeksma/lowcoder-create-component-plugin/blob/lowcoder-comp-bpmn-io/lowcoder-comp-bpmn-io/images/designer-example.png?raw=true)
+
+#### Viewer
+![viewer](https://github.com/sjhoeksma/lowcoder-create-component-plugin/blob/lowcoder-comp-bpmn-io/lowcoder-comp-bpmn-io/images/viewer-example.png?raw=true)
