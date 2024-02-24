@@ -1,0 +1,134 @@
+{
+    "applicationInfo": {
+        "name": "Example lowcoder-comp-bpmn-io",
+        "createAt": 1708374549503,
+        "createBy": "659c3d906dfae3228796b5ba",
+        "applicationId": "65d3ba15ce88962d49bb640x",
+        "applicationType": 1
+    },
+    "applicationDSL": {
+        "ui": {
+            "layout": {
+                "91ffd1f": {
+                    "i": "91ffd1f",
+                    "h": 46,
+                    "w": 24,
+                    "x": 0,
+                    "y": 0
+                }
+            },
+            "items": {
+                "91ffd1f": {
+                    "compType": "remote#npm#lowcoder-comp-bpmn-io@0.0.6#bpmn",
+                    "comp": {
+                        "autoHeight": "fixed",
+                        "styles": {
+                            "margin": "0",
+                            "padding": "0"
+                        },
+                        "xml": "{{xmlquery.value.length>0 ? xmlquery.value[0].xml : \"\"}}",
+                        "values": "{{values.value}}",
+                        "svgDownload": true,
+                        "designer": false,
+                        "showLogo": true,
+                        "onEvent": [
+                            {
+                                "name": "change",
+                                "handler": {
+                                    "compType": "message",
+                                    "comp": {
+                                        "text": "Tester",
+                                        "level": "info"
+                                    },
+                                    "condition": "",
+                                    "slowdown": "debounce",
+                                    "delay": ""
+                                }
+                            }
+                        ]
+                    },
+                    "name": "bpmn1"
+                }
+            }
+        },
+        "transformers": [
+            {
+                "name": "values",
+                "script": "return {\"a\" :1, \"O\" : {\"a\":1} }"
+            },
+            {
+                "name": "xmlquery",
+                "script": "return [\n  {\n    \"xml\": `<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\n<bpmn:definitions xmlns:xsi=\\\"http://www.w3.org/2001/XMLSchema-instance\\\" xmlns:bpmn=\\\"http://www.omg.org/spec/BPMN/20100524/MODEL\\\" xmlns:bpmndi=\\\"http://www.omg.org/spec/BPMN/20100524/DI\\\" xmlns:dc=\\\"http://www.omg.org/spec/DD/20100524/DC\\\" xmlns:di=\\\"http://www.omg.org/spec/DD/20100524/DI\\\" id=\\\"Definitions_04v2rks\\\" targetNamespace=\\\"http://bpmn.io/schema/bpmn\\\" exporter=\\\"bpmn-js (https://demo.bpmn.io)\\\" exporterVersion=\\\"16.4.0\\\">\\n  <bpmn:process id=\\\"Process_0x17sqv\\\" isExecutable=\\\"false\\\">\\n    <bpmn:task id=\\\"Activity_1u6navf\\\" name=\\\"A\n{{a}}\\\">\\n      <bpmn:outgoing>Flow_1fuxa7x</bpmn:outgoing>\\n    </bpmn:task>\\n    <bpmn:task id=\\\"Activity_0k1jyoh\\\" name=\\\"O.a\n{{O.a}}\\\">\\n      <bpmn:incoming>Flow_1fuxa7x</bpmn:incoming>\\n    </bpmn:task>\\n    <bpmn:sequenceFlow id=\\\"Flow_1fuxa7x\\\" sourceRef=\\\"Activity_1u6navf\\\" targetRef=\\\"Activity_0k1jyoh\\\" />\\n  </bpmn:process>\\n  <bpmndi:BPMNDiagram id=\\\"BPMNDiagram_1\\\">\\n    <bpmndi:BPMNPlane id=\\\"BPMNPlane_1\\\" bpmnElement=\\\"Process_0x17sqv\\\">\\n      <bpmndi:BPMNShape id=\\\"Activity_1u6navf_di\\\" bpmnElement=\\\"Activity_1u6navf\\\">\\n        <dc:Bounds x=\\\"220\\\" y=\\\"150\\\" width=\\\"100\\\" height=\\\"80\\\" />\\n        <bpmndi:BPMNLabel />\\n      </bpmndi:BPMNShape>\\n      <bpmndi:BPMNShape id=\\\"Activity_0k1jyoh_di\\\" bpmnElement=\\\"Activity_0k1jyoh\\\">\\n        <dc:Bounds x=\\\"370\\\" y=\\\"150\\\" width=\\\"100\\\" height=\\\"80\\\" />\\n        <bpmndi:BPMNLabel />\\n      </bpmndi:BPMNShape>\\n      <bpmndi:BPMNEdge id=\\\"Flow_1fuxa7x_di\\\" bpmnElement=\\\"Flow_1fuxa7x\\\">\\n        <di:waypoint x=\\\"320\\\" y=\\\"190\\\" />\\n        <di:waypoint x=\\\"370\\\" y=\\\"190\\\" />\\n      </bpmndi:BPMNEdge>\\n    </bpmndi:BPMNPlane>\\n  </bpmndi:BPMNDiagram>\\n</bpmn:definitions>\\n`\n  }\n]"
+            }
+        ],
+        "refTree": {
+            "value": "",
+            "items": [
+                {
+                    "value": "values"
+                },
+                {
+                    "value": "xmlquery"
+                }
+            ]
+        },
+        "hooks": [
+            {
+                "compType": "urlParams",
+                "comp": {},
+                "name": "url"
+            },
+            {
+                "compType": "dayJsLib",
+                "comp": {},
+                "name": "dayjs"
+            },
+            {
+                "compType": "lodashJsLib",
+                "comp": {},
+                "name": "_"
+            },
+            {
+                "compType": "utils",
+                "comp": {},
+                "name": "utils"
+            },
+            {
+                "compType": "message",
+                "comp": {},
+                "name": "message"
+            },
+            {
+                "compType": "localStorage",
+                "comp": {},
+                "name": "localStorage"
+            },
+            {
+                "compType": "currentUser",
+                "comp": {},
+                "name": "currentUser"
+            },
+            {
+                "compType": "screenInfo",
+                "comp": {},
+                "name": "screenInfo"
+            },
+            {
+                "compType": "theme",
+                "comp": {},
+                "name": "theme"
+            }
+        ],
+        "settings": {
+            "maxWidth": {
+                "dropdown": "Infinity",
+                "input": "Infinity"
+            },
+            "themeId": "default"
+        },
+        "preload": {
+            "script": "",
+            "css": ""
+        }
+    }
+}
