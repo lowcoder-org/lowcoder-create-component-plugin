@@ -37,12 +37,12 @@
                                 "handler": {
                                     "compType": "message",
                                     "comp": {
-                                        "text": "Tester",
+                                        "text": "BPMN Changed",
                                         "level": "info"
                                     },
                                     "condition": "",
                                     "slowdown": "debounce",
-                                    "delay": ""
+                                    "delay": "2s"
                                 }
                             }
                         ]
