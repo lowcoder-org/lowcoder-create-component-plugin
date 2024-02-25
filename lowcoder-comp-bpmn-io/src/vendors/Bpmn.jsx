@@ -129,7 +129,7 @@ function Bpmn(props) {
         dLink.onclick =downloadBPMNImage
       }
     }
-  }, [bpmnRef, props.xml,props.values,props.svgDownload,props.width, props.height,
+  }, [bpmnRef, props.xml,props.values,props.svgDownload,
                props.imageName,props.designer,props.showLogo,props.onDataChange]);
 
   return (
