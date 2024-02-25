@@ -105,7 +105,6 @@ let ZxingScanCompBase = (function () {
     const [scannerState, setScannerState] = useState(props.scannerState);
     const [scannerDevice, setScannerDevice] = useState(props.scannerDevice);
     const [timeBetweenDecodingAttempts, setTimeBetweenDecodingAttempts] = useState(props.scannerInterval);
-    const isPaused = scannerState === 'pause' || scannerState === 'stop';
     const continuousValue = useRef([]);
 
     const ZxingQrcodePlugin = (props) => {
@@ -114,9 +113,10 @@ let ZxingScanCompBase = (function () {
       const [hints, setHints] = useState({});      
 
       const { ref } = useZxing({
-        paused: isPaused,
+        paused: scannerState === 'pause' || scannerState === 'stop',
         deviceId: props.scannerDevice,
         timeBetweenDecodingAttempts: timeBetweenDecodingAttempts,
+
         onDecodeResult(result) {
           const resultText = result.getText();
           const resultFormat = result.getBarcodeFormat();
@@ -131,10 +131,25 @@ let ZxingScanCompBase = (function () {
           console.error("General error", error);
         }
       });
+
+
+      useEffect(() => {
+        if (scannerState === 'stop') {
+          const videoElement = ref.current as HTMLVideoElement;
+          // this does not work
+          console.log("videoElement", videoElement?.srcObject);
+          if (videoElement && videoElement.srcObject) {
+            const stream: MediaStream = videoElement.srcObject as MediaStream
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+            videoElement.srcObject = null;
+          }
+        }
+      }, [scannerState, ref]);
   
       return (
         <>
-          <video ref={ref} style={{ height: "100%", display: scannerState !== 'stop' ? 'pause' : 'none' }} />
+          <video ref={ref} style={{ height: "100%", width: "100%", display: scannerState !== 'stop' ? 'pause' : 'none' }} />
         </>
       ); 
     };
@@ -152,7 +167,7 @@ let ZxingScanCompBase = (function () {
       } else {
         props.data.onChange(resultJson);
         props.onEvent("success");
-        setScannerState("stop");
+        setScannerState("pause");
       }
     };
 
@@ -193,7 +208,7 @@ let ZxingScanCompBase = (function () {
           paused={props.paused}
           continuous={props.continuous}
           scannerState={props.scannerState}
-          setScannerState={setScannerState}/>
+        />
       </ScannerStyle>
     );
   })
