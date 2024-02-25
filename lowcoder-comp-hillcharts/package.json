@@ -1,6 +1,6 @@
 {
   "name": "lowcoder-comp-hillcharts",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "type": "module",
   "license": "MIT",
   "dependencies": {
@@ -22,7 +22,7 @@
       "hillcharts": {
         "name": "Hillcharts",
         "icon": "./icons/hills.svg",
-        "description": "Hillchart Component",
+        "description": "Hillchart Component for Project Management",
         "layoutInfo": {
           "w": 10,
           "h": 40
