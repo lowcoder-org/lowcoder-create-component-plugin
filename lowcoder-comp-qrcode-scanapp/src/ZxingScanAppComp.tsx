@@ -164,7 +164,9 @@ let ZxingScanCompBase = (function () {
         props.data.onChange(resultJson);
         props.onEvent("success");
         setScannerState("pause");
-
+        if (scannerState !== 'stop') {
+          setScannerState("stop");
+        }
         const scannerRef = ref.current;
         if (scannerRef && scannerRef.reset) {
           scannerRef.reset();
