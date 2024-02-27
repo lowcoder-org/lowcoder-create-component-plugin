@@ -122,7 +122,7 @@ let ZxingScanCompBase = (function () {
           const resultFormat = result.getBarcodeFormat();
           const resultTimestamp = result.getTimestamp();
           const resultJson = { code: resultText, format: resultFormat, timestamp: resultTimestamp };
-          onNewScanResult(resultJson);
+          onNewScanResult(resultJson, ref);
         },
         onDecodeError(error) {
           // console.error("Decode error", error);
@@ -136,13 +136,9 @@ let ZxingScanCompBase = (function () {
       useEffect(() => {
         if (scannerState === 'stop') {
           const videoElement = ref.current as HTMLVideoElement;
-          // this does not work
-          console.log("videoElement", videoElement?.srcObject);
-          if (videoElement && videoElement.srcObject) {
-            const stream: MediaStream = videoElement.srcObject as MediaStream
-            const tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
-            videoElement.srcObject = null;
+          if (videoElement && videoElement.reset) {
+            console.log("Resetting scanner");
+            videoElement.reset();
           }
         }
       }, [scannerState, ref]);
@@ -154,7 +150,7 @@ let ZxingScanCompBase = (function () {
       ); 
     };
 
-    const onNewScanResult = async (resultJson: ScanResult) => { 
+    const onNewScanResult = async (resultJson: ScanResult, ref : React.RefObject<HTMLVideoElement>) => { 
       if (props.continuous) {
         const isUnique = !continuousValue.current.some(r => 
           r.code === resultJson.code && r.format === resultJson.format
@@ -168,6 +164,12 @@ let ZxingScanCompBase = (function () {
         props.data.onChange(resultJson);
         props.onEvent("success");
         setScannerState("pause");
+
+        const scannerRef = ref.current;
+        if (scannerRef && scannerRef.reset) {
+          scannerRef.reset();
+        }
+
       }
     };
 

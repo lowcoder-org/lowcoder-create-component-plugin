@@ -1,6 +1,6 @@
 {
   "name": "lowcoder-comp-qrcode-scanapp",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "type": "module",
   "license": "MIT",
   "dependencies": {
