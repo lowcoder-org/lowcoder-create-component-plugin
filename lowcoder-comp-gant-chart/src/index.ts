@@ -1,5 +1,5 @@
-import GantChartCompBase from "./GantChartComp";
+import GanttChartCompBase from "./GanttChartComp";
 
 export default {
-  gantchart: GantChartCompBase
+  ganttchart: GanttChartCompBase
 };

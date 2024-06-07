@@ -1,6 +1,6 @@
 {
-  "name": "lowcoder-comp-gant-chart",
-  "version": "0.0.1",
+  "name": "lowcoder-comp-gantt-chart",
+  "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "dependencies": {
@@ -16,12 +16,12 @@
     "vite": "^5.2.12"
   },
   "lowcoder": {
-    "description": "Gant Chart Component Plugin",
+    "description": "Lowcoder Gantt Chart Component Plugin",
     "comps": {
-      "gantchart": {
-        "name": "Gant Chart",
-        "icon": "./icons/hills.svg",
-        "description": "Gant Chart Component",
+      "ganttchart": {
+        "name": "Gantt Chart",
+        "icon": "./icons/gantt-chart-m.svg",
+        "description": "Gantt Chart Component",
         "layoutInfo": {
           "w": 20,
           "h": 40

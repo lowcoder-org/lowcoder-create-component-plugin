@@ -2038,9 +2038,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lowcoder-comp-gant-chart@workspace:.":
+"lowcoder-comp-gantt-chart@workspace:.":
   version: 0.0.0-use.local
-  resolution: "lowcoder-comp-gant-chart@workspace:."
+  resolution: "lowcoder-comp-gantt-chart@workspace:."
   dependencies:
     "@types/react": 18
     "@types/react-dom": 18

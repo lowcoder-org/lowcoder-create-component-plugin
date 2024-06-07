@@ -3,7 +3,6 @@ import { useResizeDetector } from "react-resize-detector";
 import { Gantt, Task, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
 import {
-  deferAction,
   UICompBuilder,
   NameConfig,
   Section,
@@ -484,18 +483,18 @@ function toSelf(color: string) {
   return color;
 }
 
-let GantChartCompBase = (function () {
+let GanttChartCompBase = (function () {
   const childrenMap = {
     styles: styleControl(CompStyles),
     autoHeight: withDefault(AutoHeightControl, "auto"),
     showHeaders: withDefault(BoolControl, true),
     showLegendTable: withDefault(BoolControl, true),
     data: GanttOptionControl,
-    gantTasks: jsonValueExposingStateControl("gantTasks", []),
+    ganttTasks: jsonValueExposingStateControl("ganttTasks", []),
     legendHeaderStyle: styleControl(TaskListHeaderStyle),
     legendStyle: styleControl(TaskListTableStyle),
     tooltipStyle: styleControl(TooltipStyle),
-    gantChartStyle: styleControl(CompStyles),
+    ganttChartStyle: styleControl(CompStyles),
     activeViewMode: dropdownControl(viewModeOptions, ViewMode.Day),
     legendWidth: withDefault(StringControl, "300px"),
     headerHeight: withDefault(NumberControl, 30),
@@ -516,7 +515,7 @@ let GantChartCompBase = (function () {
 
   return new UICompBuilder(childrenMap, (props: {
     data: Task[];
-    gantTasks: any;
+    ganttTasks: any;
     autoHeight: boolean;
     styles: any;
     onEvent: any;
@@ -527,7 +526,7 @@ let GantChartCompBase = (function () {
     legendHeaderStyle: any;
     legendStyle: any;
     tooltipStyle: any;
-    gantChartStyle: any;
+    ganttChartStyle: any;
     headerHeight: number;
     columnWidth: number;
     listCellWidth: string;
@@ -538,7 +537,7 @@ let GantChartCompBase = (function () {
     const { activeViewMode } = props;
     const [tasks, setTasks] = useState<Task[]>(props.data ?? []);
     const [dimensions, setDimensions] = useState({ width: 480, height: 300 });
-    const [updatedGantTasks, setUpdatedGantTasks] = useState<Task[]>([]);
+    const [updatedGanttTasks, setUpdatedGanttTasks] = useState<Task[]>([]);
 
     const { width, height, ref: conRef } = useResizeDetector({
       onResize: () => {
@@ -554,13 +553,13 @@ let GantChartCompBase = (function () {
     });
 
     useEffect(() => {
-      props.gantTasks.onChange(updatedGantTasks);
-    }, [updatedGantTasks]);
+      props.ganttTasks.onChange(updatedGanttTasks);
+    }, [updatedGanttTasks]);
 
-    const updateGantTasks = (newTasks: Task[], taskId: string) => {
+    const updateGanttTasks = (newTasks: Task[], taskId: string) => {
       const filteredTasks = newTasks.map(filterTaskFields);
       filteredTasks.currentChagedTask = taskId;
-      setUpdatedGantTasks(filteredTasks);
+      setUpdatedGanttTasks(filteredTasks);
       props.onEvent("handleTaskUpdate");
     };
 
@@ -580,7 +579,7 @@ let GantChartCompBase = (function () {
         }
       }
       setTasks(newTasks);
-      updateGantTasks(newTasks, task.id);
+      updateGanttTasks(newTasks, task.id);
       props.onEvent("handleTaskDateChange");
       return true;  // Confirm operation
     };
@@ -590,7 +589,7 @@ let GantChartCompBase = (function () {
       if (conf) {
         const newTasks = tasks.filter(t => t.id !== task.id);
         setTasks(newTasks);
-        updateGantTasks(newTasks, task.id);
+        updateGanttTasks(newTasks, task.id);
         props.onEvent("handleTaskDelete");
         return true;  // Confirm operation
       }
@@ -600,7 +599,7 @@ let GantChartCompBase = (function () {
     const handleProgressChange = async (task: Task) => {
       const newTasks = tasks.map(t => (t.id === task.id ? task : t));
       setTasks(newTasks);
-      updateGantTasks(newTasks, task.id);
+      updateGanttTasks(newTasks, task.id);
       props.onEvent("handleProgressChange");
       return true;  // Confirm operation
     };
@@ -623,7 +622,7 @@ let GantChartCompBase = (function () {
     const handleExpanderClick = (task: Task) => {
       const newTasks = tasks.map(t => (t.id === task.id ? task : t));
       setTasks(newTasks);
-      updateGantTasks(newTasks, task.id);
+      updateGanttTasks(newTasks, task.id);
       return true;  // Confirm operation
     };
 
@@ -645,18 +644,18 @@ let GantChartCompBase = (function () {
             columnWidth={props.columnWidth} // Individual field
             listCellWidth={props.showLegendTable ? `calc(100% - ${props.legendWidth})` : "100%"} // Individual field
             rowHeight={props.rowHeight} // Individual field
-            barFill={props.gantChartStyle?.barFill}
+            barFill={props.ganttChartStyle?.barFill}
             handleWidth={props.handleWidth} // Individual field
-            fontFamily={props.gantChartStyle?.fontFamily}
-            fontSize={props.gantChartStyle?.textSize}
-            barCornerRadius={props.gantChartStyle?.radius}
-            barProgressColor={props.gantChartStyle?.barProgressColor}
-            barProgressSelectedColor={props.gantChartStyle?.barProgressSelectedColor}
-            barBackgroundColor={props.gantChartStyle?.barBackgroundColor}
-            barBackgroundSelectedColor={props.gantChartStyle?.barBackgroundSelectedColor}
-            arrowColor={props.gantChartStyle?.arrowColor}
+            fontFamily={props.ganttChartStyle?.fontFamily}
+            fontSize={props.ganttChartStyle?.textSize}
+            barCornerRadius={props.ganttChartStyle?.radius}
+            barProgressColor={props.ganttChartStyle?.barProgressColor}
+            barProgressSelectedColor={props.ganttChartStyle?.barProgressSelectedColor}
+            barBackgroundColor={props.ganttChartStyle?.barBackgroundColor}
+            barBackgroundSelectedColor={props.ganttChartStyle?.barBackgroundSelectedColor}
+            arrowColor={props.ganttChartStyle?.arrowColor}
             arrowIndent={props.arrowIndent} // Individual field
-            todayColor={props.gantChartStyle?.todayColor}
+            todayColor={props.ganttChartStyle?.todayColor}
             TaskListHeader={createHeaderLocal(
               trans("component.name"),
               trans("component.start"),
@@ -721,7 +720,7 @@ let GantChartCompBase = (function () {
 
         <Section name={trans("sections.styles")}>
           {children.autoHeight.getPropertyView()}
-          {children.gantChartStyle.getPropertyView()}
+          {children.ganttChartStyle.getPropertyView()}
         </Section>
 
       </>
@@ -729,13 +728,13 @@ let GantChartCompBase = (function () {
     .build();
 })();
 
-GantChartCompBase = class extends GantChartCompBase {
+GanttChartCompBase = class extends GanttChartCompBase {
   autoHeight(): boolean {
     return this.children.autoHeight.getView();
   }
 };
 
-GantChartCompBase = withMethodExposing(GantChartCompBase, [
+GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
   {
     method: {
       name: "setData",
@@ -771,8 +770,8 @@ GantChartCompBase = withMethodExposing(GantChartCompBase, [
   },
 ]);
 
-export default withExposingConfigs(GantChartCompBase, [
+export default withExposingConfigs(GanttChartCompBase, [
   new NameConfig("data", trans("component.data")),
-  new NameConfig("gantTasks", trans("component.data")),
+  new NameConfig("ganttTasks", trans("component.data")),
   NameConfigHidden,
 ]);
