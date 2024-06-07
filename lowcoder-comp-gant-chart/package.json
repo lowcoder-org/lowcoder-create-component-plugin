@@ -1,0 +1,37 @@
+{
+  "name": "lowcoder-comp-gant-chart",
+  "version": "0.0.1",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "18",
+    "@types/react-dom": "18",
+    "gantt-task-react": "^0.3.9",
+    "lowcoder-cli": "^0.0.30",
+    "lowcoder-sdk": "^2.4.3",
+    "react": "18",
+    "react-dom": "18",
+    "react-resize-detector": "^10.0.1",
+    "typescript": "5.4.5",
+    "vite": "^5.2.12"
+  },
+  "lowcoder": {
+    "description": "Gant Chart Component Plugin",
+    "comps": {
+      "gantchart": {
+        "name": "Gant Chart",
+        "icon": "./icons/hills.svg",
+        "description": "Gant Chart Component",
+        "layoutInfo": {
+          "w": 20,
+          "h": 40
+        }
+      }
+    }
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "lowcoder-cli build",
+    "build_publish": "lowcoder-cli build --publish"
+  }
+}
