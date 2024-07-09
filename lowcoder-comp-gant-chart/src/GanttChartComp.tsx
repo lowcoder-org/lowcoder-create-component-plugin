@@ -22,6 +22,7 @@ import {
   BoolCodeControl,
   jsonControl,
   jsonValueExposingStateControl,
+  useMergeCompStyles,
 } from "lowcoder-sdk";
 import { i18nObjs, trans } from "./i18n/comps";
 
@@ -485,7 +486,7 @@ function toSelf(color: string) {
 
 let GanttChartCompBase = (function () {
   const childrenMap = {
-    styles: styleControl(CompStyles),
+    styles: styleControl(CompStyles, 'styles'),
     autoHeight: withDefault(AutoHeightControl, "auto"),
     showHeaders: withDefault(BoolControl, true),
     showLegendTable: withDefault(BoolControl, true),
@@ -494,7 +495,7 @@ let GanttChartCompBase = (function () {
     legendHeaderStyle: styleControl(TaskListHeaderStyle),
     legendStyle: styleControl(TaskListTableStyle),
     tooltipStyle: styleControl(TooltipStyle),
-    ganttChartStyle: styleControl(CompStyles),
+    ganttChartStyle: styleControl(CompStyles, 'ganttChartStyle'),
     activeViewMode: dropdownControl(viewModeOptions, ViewMode.Day),
     legendWidth: withDefault(StringControl, "300px"),
     headerHeight: withDefault(NumberControl, 30),
@@ -538,6 +539,8 @@ let GanttChartCompBase = (function () {
     const [tasks, setTasks] = useState<Task[]>(props.data ?? []);
     const [dimensions, setDimensions] = useState({ width: 480, height: 300 });
     const [updatedGanttTasks, setUpdatedGanttTasks] = useState<Task[]>([]);
+
+    useMergeCompStyles(props as Record<string, any>, dispatch);
 
     const { width, height, ref: conRef } = useResizeDetector({
       onResize: () => {
