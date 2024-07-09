@@ -18,6 +18,7 @@ import {
   styled,
   valueComp,
   sectionNames,
+  useMergeCompStyles,
 } from "lowcoder-sdk";
 
 import styles from "./styles.module.css";
@@ -82,7 +83,7 @@ let ScanappCompBase = (function () {
 
   const childrenMap = {
     data: arrayStringExposingStateControl("data"),
-    styles: styleControl(CompStyles),
+    styles: styleControl(CompStyles, 'styles'),
     autoHeight: withDefault(AutoHeightControl, "auto"),
     onEvent: ScannerEventHandlerControl,
     showButtons: withDefault(BoolControl, true),
@@ -92,12 +93,14 @@ let ScanappCompBase = (function () {
     scannerState: withDefault(StringControl, ""),
   };
 
-  return new UICompBuilder(childrenMap, (props) => {
+  return new UICompBuilder(childrenMap, (props, dispatch) => {
 
     const scannerRef = useRef<Html5QrcodeScanner | null>(null);
     const qrcodeRegionId = "html5qr-code-scanner";
     const continuousValue = useRef<string[]>([]);
     const [scannerState, setScannerState] = useState("");
+
+    useMergeCompStyles(props as Record<string, any>, dispatch);
 
     const qrboxFunction = function(viewfinderWidth, viewfinderHeight) {
       let minEdgePercentage = 0.7; // 70%
