@@ -5,9 +5,12 @@
   "license": "MIT",
   "dependencies": {
     "@observablehq/runtime": "^5.9.8",
+    "@syncfusion/ej2-react-kanban": "^26.1.40",
     "@types/prop-types": "^15.7.12",
     "@types/react": "18",
     "@types/react-dom": "18",
+    "antd": "^5.19.1",
+    "bootstrap": "^5.3.3",
     "lowcoder-cli": "^0.0.30",
     "lowcoder-sdk": "^2.4.5",
     "prop-types": "^15.8.1",
@@ -17,15 +20,15 @@
     "typescript": "^5.5.3",
     "vite": "^5.3.3"
   },
-  "lowcoder": {
-    "description": "A Demo Hillchart Component Plugin",
+"lowcoder": {
+    "description": "Kanban Component Plugin",
     "comps": {
-      "hillcharts": {
-        "name": "Hillcharts Demo",
+      "kanban": {
+        "name": "Kanban",
         "icon": "./icons/hills.svg",
-        "description": "Hillchart Plugin Demo Component",
+        "description": "Kanban Component",
         "layoutInfo": {
-          "w": 10,
+          "w": 20,
           "h": 40
         }
       }
