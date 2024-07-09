@@ -12,6 +12,7 @@ import {
   jsonControl,
   AutoHeightControl,
   EditorContext,
+  useMergeCompStyles,
 } from "lowcoder-sdk";
 import { useResizeDetector } from "react-resize-detector";
 
@@ -73,7 +74,7 @@ interface Point {
 let HillchartsCompBase = (function () {
 
   const childrenMap = {
-    styles: styleControl(CompStyles),
+    styles: styleControl(CompStyles, 'styles'),
     autoHeight: withDefault(AutoHeightControl, "auto"),
     data: jsonControl(toJSONObjectArray, i18nObjs.defaultData),
     onEvent: eventHandlerControl([
@@ -90,7 +91,9 @@ let HillchartsCompBase = (function () {
     styles: { backgroundColor: any; border: any; radius: any; borderWidth: any; margin: any; padding: any; textSize: any; };
     data: any[] | null | undefined;
     autoHeight: boolean;
-  }) => {
+  }, dispatch) => {
+  useMergeCompStyles(props as Record<string, any>, dispatch);
+
   const handleDataChange = () => {
     props.onEvent("change");
   };
