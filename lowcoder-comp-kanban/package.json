@@ -1,0 +1,39 @@
+{
+  "name": "lowcoder-comp-kanban",
+  "version": "0.0.1",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@observablehq/runtime": "^5.9.8",
+    "@types/prop-types": "^15.7.12",
+    "@types/react": "18",
+    "@types/react-dom": "18",
+    "lowcoder-cli": "^0.0.30",
+    "lowcoder-sdk": "^2.4.5",
+    "prop-types": "^15.8.1",
+    "react": "18",
+    "react-dom": "18",
+    "react-resize-detector": "^11.0.1",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3"
+  },
+  "lowcoder": {
+    "description": "A Demo Hillchart Component Plugin",
+    "comps": {
+      "hillcharts": {
+        "name": "Hillcharts Demo",
+        "icon": "./icons/hills.svg",
+        "description": "Hillchart Plugin Demo Component",
+        "layoutInfo": {
+          "w": 10,
+          "h": 40
+        }
+      }
+    }
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "lowcoder-cli build",
+    "build_publish": "lowcoder-cli build --publish"
+  }
+}
