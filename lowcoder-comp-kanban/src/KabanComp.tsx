@@ -430,7 +430,7 @@ let ContainerBaseComp = (function () {
         style={{ height: `100%`, width: `100%` }}
       >
         <Modal
-          title="Edit Task"
+          title="Edit Task 1234"
           open={isModalOpen}
           onOk={handleOk}
           onCancel={handleCancel}
