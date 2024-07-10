@@ -430,7 +430,7 @@ let ContainerBaseComp = (function () {
         style={{ height: `100%`, width: `100%` }}
       >
         <Modal
-          title="Edit Task 1234"
+          title="Edit Task"
           open={isModalOpen}
           onOk={handleOk}
           onCancel={handleCancel}
@@ -494,7 +494,7 @@ let ContainerBaseComp = (function () {
               >
                 <ColumnsDirective>
                   <ColumnDirective
-                    headerText="To Do"
+                    headerText="To Do 11111"
                     keyField="Open"
                     allowToggle={true}
                     template={columnTemplate}
