@@ -406,6 +406,14 @@ let ContainerBaseComp = (function () {
 
     const handleCancel = () => {
       setIsModalOpen(false);
+      setDialogData({
+        Title: '',
+        Status: getStatus(),
+        Assignee: getAllSigneed(),
+        RankId: '',
+        Summary: '',
+        Tags: '',
+      });
     };
     const items: MenuProps["items"] = [
       {
@@ -427,7 +435,7 @@ let ContainerBaseComp = (function () {
     return (
       <div
         className="schedule-control-section"
-        style={{ height: `100%`, width: `100%` }}
+        style={{height: `100%`, width: `100%`}}
       >
         <Modal
           title="Edit Task"
@@ -440,8 +448,10 @@ let ContainerBaseComp = (function () {
             <Typography.Title level={5}>Title</Typography.Title>
             <Input
               placeholder={"Title"}
-              onChange={handleDataChange}
-              defaultValue={dialogData["Title"]}
+              onChange={(e) =>
+                setDialogData((prev) => ({...prev, Title: e.target.value}))
+              }
+              value={dialogData.Title}
             />
             <Typography.Title level={5}>Status</Typography.Title>
             {/* <Dropdown menu={{ items }} trigger={["click"]} /> */}
@@ -450,14 +460,18 @@ let ContainerBaseComp = (function () {
             <Typography.Title level={5}>Summary</Typography.Title>
             <Input
               placeholder={"Summary"}
-              onChange={handleDataChange}
-              defaultValue={dialogData["Summary"]}
+              onChange={(e) =>
+                setDialogData((prev) => ({...prev, Summary: e.target.value}))
+              }
+              value={dialogData.Summary}
             />
             <Typography.Title level={5}>Tags</Typography.Title>
             <Input
               placeholder={"Tags"}
-              onChange={handleDataChange}
-              defaultValue={dialogData["Tags"]}
+              onChange={(e) =>
+                setDialogData((prev) => ({...prev, Tags: e.target.value}))
+              }
+              value={dialogData.Tags}
             />
           </Flex>
         </Modal>
@@ -481,7 +495,7 @@ let ContainerBaseComp = (function () {
                 dataSource={data}
                 // enableTooltip={true}
                 cardDoubleClick={OnCardDoubleClick}
-                swimlaneSettings={{ keyField: "Assignee" }}
+                swimlaneSettings={{keyField: "Assignee"}}
                 actionComplete={handleDataChange}
                 cardSettings={{
                   headerField: "Title",
@@ -494,7 +508,7 @@ let ContainerBaseComp = (function () {
               >
                 <ColumnsDirective>
                   <ColumnDirective
-                    headerText="To Do 11111"
+                    headerText="To Do"
                     keyField="Open"
                     allowToggle={true}
                     template={columnTemplate}
