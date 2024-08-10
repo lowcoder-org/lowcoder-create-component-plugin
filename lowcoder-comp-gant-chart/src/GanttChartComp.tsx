@@ -197,7 +197,7 @@ const createTaskListLocal = (
   rowHeight: number;
   rowWidth: string;
   locale: string;
-  tasks: Task[];
+  tasks: (Task&{title:string})[];
   selectedTaskId: string;
   setSelectedTask: (taskId: string) => void;
   onExpanderClick: (task: Task) => void;
@@ -339,7 +339,7 @@ const createTooltip = (
   borderWidth: string,
   borderColor: string,
 ): React.FunctionComponent<{
-  task: Task;
+  task: Task&{title:string};
 }> => {
   return ({ task }) => {
     const style = {
@@ -392,7 +392,7 @@ const getStartEndDateForProject = (tasks: Task[], projectId: string) => {
   return [start, end];
 };
 
-const filterTaskFields = (task: Task & { barChildren: Omit<OptionPropertyParam, 'label' | 'hideChildren'>[]}) => ({
+const filterTaskFields = (task: Task & { barChildren: Omit<OptionPropertyParam, 'label' | 'hideChildren'>[],title:string}) => ({
   id: task.id,
   title: task.title,
   type: task.type,
