@@ -22,9 +22,15 @@ import {
   BoolCodeControl,
   jsonControl,
   jsonValueExposingStateControl,
-  useMergeCompStyles,
+  // useMergeCompStyles,
 } from "lowcoder-sdk";
 import { i18nObjs, trans } from "./i18n/comps";
+
+export enum DEP_TYPE {
+  CONTRAST_TEXT = 'contrastText',
+  SELF = 'toSelf',
+}
+
 
 export const CompStyles = [
   { name: "textSize", label: trans("style.textSize"), textSize: "textSize" },
@@ -250,7 +256,7 @@ const createTaskListLocal = (
                     width: "33%",
                     paddingTop: rowHeight * 0.3,
                   }}
-                  title={t.name}
+                  title={t.title}
                 >
                   <div className="Gantt-Task-List_Name-Container" style={{flexDirection: "row", display: "flex",}}>
                     <div
@@ -275,7 +281,7 @@ const createTaskListLocal = (
                       }}
                       onClick={() => onClick(t)}
                     >
-                      {t.name}
+                      {t.title}
                     </div>
                   </div>
                 </div>
@@ -353,7 +359,7 @@ const createTooltip = (
           className={"Gantt-Tooltip_Paragraph Gantt-Tooltip_Paragraph__Information"}
           style={{ fontSize: textSize }}
         >
-          {task.name}
+          {task.title}
         </p>
         <p className={"Gantt-Tooltip_Paragraph"} style={{ fontSize: textSize }}>
           {`${startDisplayName}: ${formatDateShort(task.start, includeTime)}`}
@@ -386,9 +392,9 @@ const getStartEndDateForProject = (tasks: Task[], projectId: string) => {
   return [start, end];
 };
 
-const filterTaskFields = (task: Task) => ({
+const filterTaskFields = (task: Task & { barChildren: Omit<OptionPropertyParam, 'label' | 'hideChildren'>[]}) => ({
   id: task.id,
-  name: task.name,
+  title: task.title,
   type: task.type,
   start: task.start,
   end: task.end,
@@ -397,7 +403,7 @@ const filterTaskFields = (task: Task) => ({
   dependencies: task.dependencies,
   barChildren: task.barChildren ? task.barChildren.map(child => ({
     id: child.id,
-    name: child.name,
+    title: child.title,
     type: child.type,
     start: child.start,
     end: child.end,
@@ -409,7 +415,7 @@ const filterTaskFields = (task: Task) => ({
 
 let GanttOption = new MultiCompBuilder(
   {
-    name: StringControl,
+    title: StringControl,
     start: jsonControl((data: any) => new Date(data)),
     end: jsonControl((data: any) => new Date(data)),
     label: StringControl,
@@ -427,7 +433,7 @@ let GanttOption = new MultiCompBuilder(
 type OptionPropertyParam = {
   start?: Date;
   end?: Date;
-  name?: string;
+  title?: string;
   label?: string;
   id?: string;
   progress?: number;
@@ -445,7 +451,7 @@ GanttOption = class extends GanttOption implements OptionCompProperty {
   propertyView(param: any) {
     return (
       <>
-        {this.children.name.propertyView({ label: trans("component.name") })}
+        {this.children.title.propertyView({ label: trans("component.name") })}
         {this.children.start.propertyView({ label: trans("component.start") })}
         {this.children.end.propertyView({ label: trans("component.end") })}
         {this.children.progress.propertyView({ label: trans("component.progress") })}
@@ -462,7 +468,7 @@ GanttOption = class extends GanttOption implements OptionCompProperty {
 
 export const GanttOptionControl = optionsControl(GanttOption, {
   initOptions: i18nObjs.defaultTasks,
-  uniqField: "name",
+  uniqField: "id",
 });
 
 const viewModeOptions = [
@@ -474,11 +480,6 @@ const viewModeOptions = [
   { label: trans("viewModes.month"), value: ViewMode.Month },
   { label: trans("viewModes.year"), value: ViewMode.Year },
 ];
-
-export enum DEP_TYPE {
-  CONTRAST_TEXT = "contrastText",
-  SELF = "toSelf",
-}
 
 function toSelf(color: string) {
   return color;
@@ -539,8 +540,7 @@ let GanttChartCompBase = (function () {
     const [tasks, setTasks] = useState<Task[]>(props.data ?? []);
     const [dimensions, setDimensions] = useState({ width: 480, height: 300 });
     const [updatedGanttTasks, setUpdatedGanttTasks] = useState<Task[]>([]);
-
-    useMergeCompStyles(props as Record<string, any>, dispatch);
+    // useMergeCompStyles(props as Record<string, any>, dispatch);
 
     const { width, height, ref: conRef } = useResizeDetector({
       onResize: () => {
@@ -588,7 +588,7 @@ let GanttChartCompBase = (function () {
     };
 
     const handleTaskDelete = (task: Task) => {
-      const conf = window.confirm("Are you sure about " + task.name + " ?");
+      const conf = window.confirm("Are you sure about " + task.title + " ?");
       if (conf) {
         const newTasks = tasks.filter(t => t.id !== task.id);
         setTasks(newTasks);
@@ -751,7 +751,7 @@ GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
       ],
     },
     execute: (comp: any, values: any[]) => {
-      const newTasks = JSON.parse(values[0]);
+      const newTasks = values[0];
       comp.children.data.dispatchChangeValueAction(JSON.stringify(newTasks, null, 2));
     },
   },
