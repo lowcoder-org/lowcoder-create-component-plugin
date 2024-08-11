@@ -5,7 +5,7 @@ export const enObj: any = {
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
-      name: "Some Project",
+      title: "Some Project",
       label: "Some Project",
       id: "ProjectSample",
       progress: 25,
@@ -23,7 +23,7 @@ export const enObj: any = {
         28
       ),
       label: "Idea",
-      name: "Idea",
+      title: "Idea",
       id: "Task 0",
       progress: 45,
       type: "task",
@@ -33,7 +33,7 @@ export const enObj: any = {
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 2),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 4, 0, 0),
-      name: "Research",
+      title: "Research",
       label: "Research",
       id: "Task 1",
       progress: 25,
@@ -45,7 +45,7 @@ export const enObj: any = {
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 4),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8, 0, 0),
-      name: "Discussion with team",
+      title: "Discussion with team",
       label: "Discussion with team",
       id: "Task 2",
       progress: 10,
@@ -57,7 +57,7 @@ export const enObj: any = {
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 9, 0, 0),
-      name: "Developing",
+      title: "Developing",
       label: "Developing",
       id: "Task 3",
       progress: 2,
@@ -69,7 +69,7 @@ export const enObj: any = {
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 10),
-      name: "Review",
+      title: "Review",
       label: "Review",
       id: "Task 4",
       type: "task",
@@ -81,7 +81,7 @@ export const enObj: any = {
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
-      name: "Release",
+      title: "Release",
       label: "Release",
       id: "Task 6",
       progress: currentDate.getMonth(),
@@ -93,11 +93,11 @@ export const enObj: any = {
     {
       start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
       end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 19),
-      name: "Party Time",
+      title: "Party Time",
       label: "Party Time",
       id: "Task 9",
       progress: 0,
-      isDisabled: true,
+      // isDisabled: true,
       type: "task",
     },
   ],
