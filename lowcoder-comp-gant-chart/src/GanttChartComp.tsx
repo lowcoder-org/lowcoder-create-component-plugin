@@ -25,6 +25,7 @@ import {
   // useMergeCompStyles,
 } from "lowcoder-sdk";
 import { i18nObjs, trans } from "./i18n/comps";
+import _ from 'lodash'
 
 export enum DEP_TYPE {
   CONTRAST_TEXT = 'contrastText',
@@ -416,8 +417,8 @@ const filterTaskFields = (task: Task & { barChildren: Omit<OptionPropertyParam, 
 let GanttOption = new MultiCompBuilder(
   {
     title: StringControl,
-    start: jsonControl((data: any) => new Date(data)),
-    end: jsonControl((data: any) => new Date(data)),
+    start: jsonControl((data: any) => data ? new Date(data) : new Date()),
+    end: jsonControl((data: any) =>  data ? new Date(data) : new Date()),
     label: StringControl,
     id: StringControl,
     project: StringControl,
@@ -556,6 +557,16 @@ let GanttChartCompBase = (function () {
     });
 
     useEffect(() => {
+      if (tasks.length === 0) {
+        if (props.data.length > 0) {
+          setTasks(props.data);
+        }
+      } else if (!_.isEqual(props.data, tasks)) {
+        setTasks(props.data)
+      }
+    }, [props.data])
+
+    useEffect(() => {
       props.ganttTasks.onChange(updatedGanttTasks);
     }, [updatedGanttTasks]);
 
@@ -633,7 +644,7 @@ let GanttChartCompBase = (function () {
       <div className="Wrapper" ref={conRef}>
         {tasks.length > 0 ? (
           <Gantt
-            tasks={tasks}
+            tasks={tasks.map(task=>({...task,name:task.title}))}
             viewMode={activeViewMode}
             onDateChange={handleTaskChange}
             onDelete={handleTaskDelete}

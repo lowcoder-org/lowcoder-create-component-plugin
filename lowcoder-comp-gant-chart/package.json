@@ -7,6 +7,7 @@
     "@types/react": "18",
     "@types/react-dom": "18",
     "gantt-task-react": "^0.3.9",
+    "lodash": "^4.17.21",
     "lowcoder-cli": "^0.0.30",
     "lowcoder-sdk": "^2.4.3",
     "react": "18",
@@ -33,5 +34,8 @@
     "start": "vite",
     "build": "lowcoder-cli build",
     "build_publish": "lowcoder-cli build --publish"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.7"
   }
 }
