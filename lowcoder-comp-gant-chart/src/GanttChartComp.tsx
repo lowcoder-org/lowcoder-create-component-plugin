@@ -26,7 +26,7 @@ import {
 } from "lowcoder-sdk";
 import { i18nObjs, trans } from "./i18n/comps";
 import _ from 'lodash'
-
+import {isValid} from "date-fns"
 export enum DEP_TYPE {
   CONTRAST_TEXT = 'contrastText',
   SELF = 'toSelf',
@@ -198,7 +198,7 @@ const createTaskListLocal = (
   rowHeight: number;
   rowWidth: string;
   locale: string;
-  tasks: (Task&{title:string})[];
+  tasks: (Task&{label:string})[];
   selectedTaskId: string;
   setSelectedTask: (taskId: string) => void;
   onExpanderClick: (task: Task) => void;
@@ -257,7 +257,7 @@ const createTaskListLocal = (
                     width: "33%",
                     paddingTop: rowHeight * 0.3,
                   }}
-                  title={t.title}
+                  title={t.label}
                 >
                   <div className="Gantt-Task-List_Name-Container" style={{flexDirection: "row", display: "flex",}}>
                     <div
@@ -282,7 +282,7 @@ const createTaskListLocal = (
                       }}
                       onClick={() => onClick(t)}
                     >
-                      {t.title}
+                      {t.label}
                     </div>
                   </div>
                 </div>
@@ -340,7 +340,7 @@ const createTooltip = (
   borderWidth: string,
   borderColor: string,
 ): React.FunctionComponent<{
-  task: Task&{title:string};
+  task: Task&{label:string};
 }> => {
   return ({ task }) => {
     const style = {
@@ -360,7 +360,7 @@ const createTooltip = (
           className={"Gantt-Tooltip_Paragraph Gantt-Tooltip_Paragraph__Information"}
           style={{ fontSize: textSize }}
         >
-          {task.title}
+          {task.label}
         </p>
         <p className={"Gantt-Tooltip_Paragraph"} style={{ fontSize: textSize }}>
           {`${startDisplayName}: ${formatDateShort(task.start, includeTime)}`}
@@ -393,9 +393,9 @@ const getStartEndDateForProject = (tasks: Task[], projectId: string) => {
   return [start, end];
 };
 
-const filterTaskFields = (task: Task & { barChildren: Omit<OptionPropertyParam, 'label' | 'hideChildren'>[],title:string}) => ({
+const filterTaskFields = (task: Task & { barChildren: Omit<OptionPropertyParam,  'hideChildren'>[],label:string}) => ({
   id: task.id,
-  title: task.title,
+  label: task.label,
   type: task.type,
   start: task.start,
   end: task.end,
@@ -404,7 +404,7 @@ const filterTaskFields = (task: Task & { barChildren: Omit<OptionPropertyParam, 
   dependencies: task.dependencies,
   barChildren: task.barChildren ? task.barChildren.map(child => ({
     id: child.id,
-    title: child.title,
+    label: child.label,
     type: child.type,
     start: child.start,
     end: child.end,
@@ -414,12 +414,32 @@ const filterTaskFields = (task: Task & { barChildren: Omit<OptionPropertyParam, 
   })) : [],
 });
 
+function checkValidDate(date: any) {
+  // Convert the input to a Date object if it's a string or number
+  if (
+    !(date instanceof Date) &&
+    typeof date!=='number'&&
+    date !== undefined
+  ) {
+    date = new Date(date);
+  }
+
+  // Check if the converted Date object is valid
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    return false;
+  }
+
+  return isValid(date);
+}
+
 let GanttOption = new MultiCompBuilder(
   {
-    title: StringControl,
-    start: jsonControl((data: any) => data ? new Date(data) : new Date()),
-    end: jsonControl((data: any) =>  data ? new Date(data) : new Date()),
     label: StringControl,
+    start: jsonControl((data: any) => data?checkValidDate(data) ? new Date(data) : new Date():new Date()),
+    end: jsonControl((data: any) => 
+       data ? checkValidDate(data) ? new Date(data) : new Date() : new Date()
+    ),
+    // label: StringControl,
     id: StringControl,
     project: StringControl,
     progress: NumberControl,
@@ -434,8 +454,8 @@ let GanttOption = new MultiCompBuilder(
 type OptionPropertyParam = {
   start?: Date;
   end?: Date;
-  title?: string;
   label?: string;
+  // label?: string;
   id?: string;
   progress?: number;
   type?: string;
@@ -452,7 +472,7 @@ GanttOption = class extends GanttOption implements OptionCompProperty {
   propertyView(param: any) {
     return (
       <>
-        {this.children.title.propertyView({ label: trans("component.name") })}
+        {this.children.label.propertyView({ label: trans("component.name") })}
         {this.children.start.propertyView({ label: trans("component.start") })}
         {this.children.end.propertyView({ label: trans("component.end") })}
         {this.children.progress.propertyView({ label: trans("component.progress") })}
@@ -469,7 +489,7 @@ GanttOption = class extends GanttOption implements OptionCompProperty {
 
 export const GanttOptionControl = optionsControl(GanttOption, {
   initOptions: i18nObjs.defaultTasks,
-  uniqField: "id",
+  uniqField: "label",
 });
 
 const viewModeOptions = [
@@ -541,6 +561,8 @@ let GanttChartCompBase = (function () {
     const [tasks, setTasks] = useState<Task[]>(props.data ?? []);
     const [dimensions, setDimensions] = useState({ width: 480, height: 300 });
     const [updatedGanttTasks, setUpdatedGanttTasks] = useState<Task[]>([]);
+    const [previousData, setPreviousData] = useState<Task[]>(props?.data);
+
     // useMergeCompStyles(props as Record<string, any>, dispatch);
 
     const { width, height, ref: conRef } = useResizeDetector({
@@ -557,13 +579,20 @@ let GanttChartCompBase = (function () {
     });
 
     useEffect(() => {
-      if (tasks.length === 0) {
-        if (props.data.length > 0) {
-          setTasks(props.data);
+      if (!_.isEqual(previousData, props.data)) {
+          //stops unnecessary props.data re-render
+          if (tasks.length === 0) {
+            //handle map mode
+            if (props.data.length > 0) {
+              setTasks(props.data);
+              setPreviousData(props.data);
+            }
+          } else if (!_.isEqual(props.data, tasks)) {
+            //detect any change in data
+            setTasks(props.data); //pass updated data to gantt chart
+            setPreviousData(props.data);
+          }
         }
-      } else if (!_.isEqual(props.data, tasks)) {
-        setTasks(props.data)
-      }
     }, [props.data])
 
     useEffect(() => {
@@ -572,7 +601,7 @@ let GanttChartCompBase = (function () {
 
     const updateGanttTasks = (newTasks: Task[], taskId: string) => {
       const filteredTasks = newTasks.map(filterTaskFields);
-      filteredTasks.currentChagedTask = taskId;
+      filteredTasks.currentChangedTask = taskId;
       setUpdatedGanttTasks(filteredTasks);
       props.onEvent("handleTaskUpdate");
     };
@@ -599,7 +628,7 @@ let GanttChartCompBase = (function () {
     };
 
     const handleTaskDelete = (task: Task) => {
-      const conf = window.confirm("Are you sure about " + task.title + " ?");
+      const conf = window.confirm("Are you sure about " + task.label + " ?");
       if (conf) {
         const newTasks = tasks.filter(t => t.id !== task.id);
         setTasks(newTasks);
@@ -644,7 +673,7 @@ let GanttChartCompBase = (function () {
       <div className="Wrapper" ref={conRef}>
         {tasks.length > 0 ? (
           <Gantt
-            tasks={tasks.map(task=>({...task,name:task.title}))}
+            tasks={tasks.map(task=>({...task,name:task.label}))}
             viewMode={activeViewMode}
             onDateChange={handleTaskChange}
             onDelete={handleTaskDelete}
