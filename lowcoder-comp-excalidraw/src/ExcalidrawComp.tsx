@@ -6,27 +6,27 @@ import {
   withDefault,
   NameConfig,
   jsonValueExposingStateControl,
-} from "lowcoder-sdk";
-import { Excalidraw } from "@excalidraw/excalidraw";
-import { useState, useRef } from "react";
-import { trans} from "./i18n/comps";
+} from 'lowcoder-sdk';
+import {Excalidraw} from '@excalidraw/excalidraw';
+import {useState, useRef, useEffect} from 'react';
+import {trans} from './i18n/comps';
 
-import { useResizeDetector } from "react-resize-detector";
+import {useResizeDetector} from 'react-resize-detector';
 const defaultData = {
   elements: [
     {
-      id: "kInUXcNd249GomID2BShG",
-      type: "rectangle",
+      id: 'kInUXcNd249GomID2BShG',
+      type: 'rectangle',
       x: 276.696533203125,
       y: 200.4761962890625,
       width: 291.8367919921875,
       height: 143.3603515625,
       angle: 0,
-      strokeColor: "#1e1e1e",
-      backgroundColor: "transparent",
-      fillStyle: "solid",
+      strokeColor: '#1e1e1e',
+      backgroundColor: 'transparent',
+      fillStyle: 'solid',
       strokeWidth: 2,
-      strokeStyle: "solid",
+      strokeStyle: 'solid',
       roughness: 1,
       opacity: 100,
       groupIds: [],
@@ -46,20 +46,20 @@ const defaultData = {
   ],
   appState: {
     gridSize: null,
-    viewBackgroundColor: "#ffffff",
+    viewBackgroundColor: '#fff',
   },
   files: {},
 };
 let ExcalidrawCompBase = (function () {
   const childrenMap = {
-    autoHeight: withDefault(AutoHeightControl, "auto"),
-    data: jsonValueExposingStateControl("data", defaultData)
+    autoHeight: withDefault(AutoHeightControl, 'auto'),
+    data: jsonValueExposingStateControl('data', defaultData),
   };
 
   return new UICompBuilder(childrenMap, (props: any) => {
     const previousDrawRef = useRef({});
-
-    const [dimensions, setDimensions] = useState({ width: 480, height: 600 });
+    const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null);
+    const [dimensions, setDimensions] = useState({width: 480, height: 600});
     const {
       width,
       height,
@@ -83,7 +83,11 @@ let ExcalidrawCompBase = (function () {
         });
       },
     });
-
+    useEffect(() => {
+      if (excalidrawAPI) {
+        excalidrawAPI.updateScene(props.data.value);
+      }
+    }, [JSON.stringify(props.data)]);
     return (
       <div
         ref={conRef}
@@ -92,10 +96,11 @@ let ExcalidrawCompBase = (function () {
           width: `100%`,
         }}
       >
-        <div style={{ height: dimensions.height, width: dimensions.width }}>
+        <div style={{height: dimensions.height, width: dimensions.width}}>
           <Excalidraw
             isCollaborating={false}
             initialData={props.data.value}
+            excalidrawAPI={(api) => setExcalidrawAPI(api)}
             onChange={(excalidrawElements, appState, files) => {
               let draw = {
                 elements: excalidrawElements,
@@ -119,7 +124,7 @@ let ExcalidrawCompBase = (function () {
       return (
         <>
           <Section name="Basic">
-            {children.data.propertyView({ label: "Data" })}
+            {children.data.propertyView({label: 'Data'})}
           </Section>
           <Section name="Styles">
             {children.autoHeight.getPropertyView()}
@@ -137,5 +142,5 @@ ExcalidrawCompBase = class extends ExcalidrawCompBase {
 };
 
 export default withExposingConfigs(ExcalidrawCompBase, [
-  new NameConfig("data", trans("component.data")),
+  new NameConfig('data', trans('component.data')),
 ]);
