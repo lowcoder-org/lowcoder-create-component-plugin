@@ -1,5 +1,5 @@
-import HillchartsComp from "./ExcalidrawComp";
+import ExcalidrawComp from "./ExcalidrawComp";
 
 export default {
-  excalidraw: HillchartsComp,
+  excalidraw: ExcalidrawComp,
 };
