@@ -777,41 +777,41 @@ GanttChartCompBase = class extends GanttChartCompBase {
   }
 };
 
-GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
-  {
-    method: {
-      name: "setData",
-      description: "Set Gantt Chart Data",
-      params: [
-        {
-          name: "data",
-          type: "JSON",
-          description: "JSON value",
-        },
-      ],
-    },
-    execute: (comp: any, values: any[]) => {
-      const newTasks = values[0];
-      comp.children.data.dispatchChangeValueAction(JSON.stringify(newTasks, null, 2));
-    },
-  },
-  {
-    method: {
-      name: "getData",
-      description: "Get Gantt Chart Data",
-      params: [
-        {
-          name: "data",
-          type: "JSON",
-          description: "JSON value",
-        },
-      ],
-    },
-    execute: (comp: any) => {
-      comp.children.updatedData.getView()
-    },
-  },
-]);
+// GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
+//   {
+//     method: {
+//       name: "setData",
+//       description: "Set Gantt Chart Data",
+//       params: [
+//         {
+//           name: "data",
+//           type: "JSON",
+//           description: "JSON value",
+//         },
+//       ],
+//     },
+//     execute: (comp: any, values: any[]) => {
+//       const newTasks = values[0];
+//       comp.children.data.dispatchChangeValueAction(JSON.stringify(newTasks, null, 2));
+//     },
+//   },
+//   {
+//     method: {
+//       name: "getData",
+//       description: "Get Gantt Chart Data",
+//       params: [
+//         {
+//           name: "data",
+//           type: "JSON",
+//           description: "JSON value",
+//         },
+//       ],
+//     },
+//     execute: (comp: any) => {
+//       comp.children.updatedData.getView()
+//     },
+//   },
+// ]);
 
 export default withExposingConfigs(GanttChartCompBase, [
   new NameConfig("data", trans("component.data")),
