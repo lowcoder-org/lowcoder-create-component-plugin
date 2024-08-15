@@ -1,6 +1,6 @@
 {
-  "name": "meenam-lowcoder-comp-excalidraw-1",
-  "version": "0.0.8",
+  "name": "lowcoder-comp-excalidraw",
+  "version": "0.0.1",
   "type": "module",
   "license": "MIT",
   "dependencies": {
@@ -9,6 +9,7 @@
     "@types/react": "18",
     "@types/react-dom": "18",
     "d3-array": "^3.2.4",
+    "lodash": "^4.17.21",
     "lowcoder-cli": "^0.0.30",
     "lowcoder-sdk": "^2.4.3",
     "prop-types": "^15.8.1",
@@ -36,5 +37,8 @@
     "start": "vite",
     "build": "lowcoder-cli build",
     "build_publish": "lowcoder-cli build --publish"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.7"
   }
 }

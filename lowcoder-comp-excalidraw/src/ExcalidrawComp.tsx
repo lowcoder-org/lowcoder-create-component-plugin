@@ -10,6 +10,7 @@ import {
 import {Excalidraw} from '@excalidraw/excalidraw';
 import {useState, useRef, useEffect} from 'react';
 import {trans} from './i18n/comps';
+import isEqual from 'lodash/isEqual';
 
 import {useResizeDetector} from 'react-resize-detector';
 const defaultData = {
@@ -83,11 +84,14 @@ let ExcalidrawCompBase = (function () {
         });
       },
     });
+    
     useEffect(() => {
-      if (excalidrawAPI) {
+      if (excalidrawAPI && isEqual(previousDrawRef.current, props.data.value)) {
         excalidrawAPI.updateScene(props.data.value);
+        previousDrawRef.current = props.data.value;
       }
-    }, [JSON.stringify(props.data)]);
+    }, [props.data.value, excalidrawAPI]);
+    
     return (
       <div
         ref={conRef}
@@ -100,7 +104,11 @@ let ExcalidrawCompBase = (function () {
           <Excalidraw
             isCollaborating={false}
             initialData={props.data.value}
-            excalidrawAPI={(api) => setExcalidrawAPI(api)}
+            excalidrawAPI={(api) => {
+              if (!excalidrawAPI) {
+                setExcalidrawAPI(api);
+              }
+            }}            
             onChange={(excalidrawElements, appState, files) => {
               let draw = {
                 elements: excalidrawElements,
