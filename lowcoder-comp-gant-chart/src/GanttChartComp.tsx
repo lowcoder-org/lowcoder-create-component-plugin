@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { Gantt, Task, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
@@ -22,8 +22,10 @@ import {
   BoolCodeControl,
   jsonControl,
   jsonValueExposingStateControl,
+  EditorContext,
+  CompNameContext,
   // useMergeCompStyles,
-} from "lowcoder-sdk";
+} from 'lowcoder-sdk';
 import { i18nObjs, trans } from "./i18n/comps";
 import _ from 'lodash'
 import {isValid} from "date-fns"
@@ -564,6 +566,10 @@ let GanttChartCompBase = (function () {
     const [previousData, setPreviousData] = useState<Task[]>(props?.data);
 
     // useMergeCompStyles(props as Record<string, any>, dispatch);
+const comp = useContext(EditorContext).getUICompByName(
+  useContext(CompNameContext)
+);
+        console.log('🚀 ~ GanttChartCompBase ~ comp:', comp);
 
     const { width, height, ref: conRef } = useResizeDetector({
       onResize: () => {
@@ -598,12 +604,16 @@ let GanttChartCompBase = (function () {
     useEffect(() => {
       props.ganttTasks.onChange(updatedGanttTasks);
     }, [updatedGanttTasks]);
-
     const updateGanttTasks = (newTasks: Task[], taskId: string) => {
       const filteredTasks = newTasks.map(filterTaskFields);
       filteredTasks.currentChangedTask = taskId;
       setUpdatedGanttTasks(filteredTasks);
       props.onEvent("handleTaskUpdate");
+      comp?.children.comp.children?.data.children.manual.children.manual.dispatch(
+        comp?.children.comp.children?.data.children.manual.children.manual.setChildrensAction(
+          newTasks
+        )
+      );
     };
 
     const handleTaskChange = (task: Task) => {
@@ -777,41 +787,68 @@ GanttChartCompBase = class extends GanttChartCompBase {
   }
 };
 
-// GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
-//   {
-//     method: {
-//       name: "setData",
-//       description: "Set Gantt Chart Data",
-//       params: [
-//         {
-//           name: "data",
-//           type: "JSON",
-//           description: "JSON value",
-//         },
-//       ],
-//     },
-//     execute: (comp: any, values: any[]) => {
-//       const newTasks = values[0];
-//       comp.children.data.dispatchChangeValueAction(JSON.stringify(newTasks, null, 2));
-//     },
-//   },
-//   {
-//     method: {
-//       name: "getData",
-//       description: "Get Gantt Chart Data",
-//       params: [
-//         {
-//           name: "data",
-//           type: "JSON",
-//           description: "JSON value",
-//         },
-//       ],
-//     },
-//     execute: (comp: any) => {
-//       comp.children.updatedData.getView()
-//     },
-//   },
-// ]);
+GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
+  {
+    method: {
+      name: "setData",
+      description: "Set Gantt Chart Data",
+      params: [
+        {
+          name: "data",
+          type: "JSON",
+          description: "JSON value",
+        },
+      ],
+    },
+    execute: (comp: any, values: any[]) => {
+      console.log("🚀 ~ values:", values)
+      const newTasks = values;
+      console.log("🚀 ~ newTasks:", newTasks)
+      comp?.children.comp.children?.data.children.manual.children.manual.dispatch(
+        comp?.children.comp.children?.data.children.manual.children.manual.setChildrensAction(
+          newTasks
+        )
+      );
+      // comp.children.data.dispatchChangeValueAction(JSON.stringify(newTasks, null, 2));
+    },
+  },
+  {
+    method: {
+      name: "getData",
+      description: "Get Gantt Chart Data",
+      params: [
+        {
+          name: "data",
+          type: "JSON",
+          description: "JSON value",
+        },
+      ],
+    },
+    execute: (comp: any) => {
+      comp.children.updatedData.getView()
+    },
+  },
+  {
+    method: {
+      name: "resetGanttTasks",
+      description: "Reset Gantt Chart Data",
+      params: [
+        {
+          name: "data",
+          type: "JSON",
+          description: "JSON value",
+        },
+      ],
+    },
+    execute: (comp: any) => {
+      comp?.children.comp.children?.data.children.manual.children.manual.dispatch(
+        comp?.children.comp.children?.data.children.manual.children.manual.setChildrensAction(
+          i18nObjs.defaultTasks
+        )
+      );
+    },
+  },
+]);
 
 export default withExposingConfigs(GanttChartCompBase, [
   new NameConfig("data", trans("component.data")),
