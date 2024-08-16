@@ -6,7 +6,7 @@ import {
   withDefault,
   NameConfig,
   jsonValueExposingStateControl,
-  withMethodExposing
+  withMethodExposing,
 } from 'lowcoder-sdk';
 import {Excalidraw} from '@excalidraw/excalidraw';
 import {useState, useRef, useEffect} from 'react';
@@ -59,6 +59,7 @@ let ExcalidrawCompBase = (function () {
   };
 
   return new UICompBuilder(childrenMap, (props: any) => {
+    console.log('🚀 ~ returnnewUICompBuilder ~ props:', props);
     const previousDrawRef = useRef({});
     const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null);
     const [dimensions, setDimensions] = useState({width: 480, height: 600});
@@ -85,16 +86,21 @@ let ExcalidrawCompBase = (function () {
         });
       },
     });
-    
+
     useEffect(() => {
-      console.log("props.data.value", props.data.value)
-      console.log("previousDrawRef.current, props.data.value", !isEqual(previousDrawRef.current, props.data.value))
-      if (excalidrawAPI && !isEqual(previousDrawRef.current, props.data.value)) {
-        excalidrawAPI.updateScene(props.data.value);
-        previousDrawRef.current = props.data.value;
+      if (
+        excalidrawAPI &&
+        !isEqual(previousDrawRef.current, props.data.value)
+      ) {
+        const timeoutId = setTimeout(() => {
+          excalidrawAPI.updateScene(props.data.value);
+          previousDrawRef.current = props.data.value;
+        }, 1000);
+
+        return () => clearTimeout(timeoutId);
       }
     }, [props.data.value, excalidrawAPI]);
-    
+
     return (
       <div
         ref={conRef}
@@ -111,7 +117,7 @@ let ExcalidrawCompBase = (function () {
               if (!excalidrawAPI) {
                 setExcalidrawAPI(api);
               }
-            }}            
+            }}
             onChange={(excalidrawElements, appState, files) => {
               let draw = {
                 elements: excalidrawElements,
@@ -155,24 +161,70 @@ ExcalidrawCompBase = class extends ExcalidrawCompBase {
 ExcalidrawCompBase = withMethodExposing(ExcalidrawCompBase, [
   {
     method: {
-      name: "setData",
-      description: "Set Gantt Chart Data",
+      name: 'setData',
+      description: 'Set Excalidraw Data',
       params: [
         {
-          name: "data",
-          type: "JSON",
-          description: "JSON value",
+          name: 'data',
+          type: 'JSON',
+          description: 'JSON value',
         },
       ],
     },
     execute: (comp: any, values: any[]) => {
-      console.log("values", values)
-      console.log("comp.children.data", comp.children.data)
-
-      comp.children.data
-
+      comp.children.data;
       const newTasks = values[0];
-      comp.children.data.dispatchChangeValueAction(JSON.stringify(newTasks, null, 2));
+      comp.children.data.dispatchChangeValueAction(
+        JSON.stringify(newTasks, null, 2)
+      );
+    },
+  },
+
+  {
+    method: {
+      name: 'clearData',
+      description: 'Clear Excalidraw Data',
+      params: [
+        {
+          name: 'data',
+          type: 'JSON',
+          description: 'JSON value',
+        },
+      ],
+    },
+    execute: (comp: any, values: any[]) => {
+      comp.children.data.dispatchChangeValueAction(
+        JSON.stringify(
+          {
+            elements: [],
+            appState: {
+              gridSize: null,
+              viewBackgroundColor: '#fff',
+            },
+            files: {},
+          },
+          null,
+          2
+        )
+      );
+    },
+  },
+  {
+    method: {
+      name: 'resetData',
+      description: 'Reset Excalidraw Data',
+      params: [
+        {
+          name: 'data',
+          type: 'JSON',
+          description: 'JSON value',
+        },
+      ],
+    },
+    execute: (comp: any, values: any[]) => {
+      comp.children.data.dispatchChangeValueAction(
+        JSON.stringify(defaultData, null, 2)
+      );
     },
   },
 ]);
