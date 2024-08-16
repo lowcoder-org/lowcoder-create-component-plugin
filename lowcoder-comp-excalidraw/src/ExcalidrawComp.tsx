@@ -6,6 +6,7 @@ import {
   withDefault,
   NameConfig,
   jsonValueExposingStateControl,
+  withMethodExposing
 } from 'lowcoder-sdk';
 import {Excalidraw} from '@excalidraw/excalidraw';
 import {useState, useRef, useEffect} from 'react';
@@ -86,7 +87,9 @@ let ExcalidrawCompBase = (function () {
     });
     
     useEffect(() => {
-      if (excalidrawAPI && isEqual(previousDrawRef.current, props.data.value)) {
+      console.log("props.data.value", props.data.value)
+      console.log("previousDrawRef.current, props.data.value", !isEqual(previousDrawRef.current, props.data.value))
+      if (excalidrawAPI && !isEqual(previousDrawRef.current, props.data.value)) {
         excalidrawAPI.updateScene(props.data.value);
         previousDrawRef.current = props.data.value;
       }
@@ -148,6 +151,31 @@ ExcalidrawCompBase = class extends ExcalidrawCompBase {
     return this.children.autoHeight.getView();
   }
 };
+
+ExcalidrawCompBase = withMethodExposing(ExcalidrawCompBase, [
+  {
+    method: {
+      name: "setData",
+      description: "Set Gantt Chart Data",
+      params: [
+        {
+          name: "data",
+          type: "JSON",
+          description: "JSON value",
+        },
+      ],
+    },
+    execute: (comp: any, values: any[]) => {
+      console.log("values", values)
+      console.log("comp.children.data", comp.children.data)
+
+      comp.children.data
+
+      const newTasks = values[0];
+      comp.children.data.dispatchChangeValueAction(JSON.stringify(newTasks, null, 2));
+    },
+  },
+]);
 
 export default withExposingConfigs(ExcalidrawCompBase, [
   new NameConfig('data', trans('component.data')),
