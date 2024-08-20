@@ -515,7 +515,6 @@ let GanttChartCompBase = (function () {
     showHeaders: withDefault(BoolControl, true),
     showLegendTable: withDefault(BoolControl, true),
     data: GanttOptionControl,
-    ganttTasks: jsonValueExposingStateControl("ganttTasks", []),
     legendHeaderStyle: styleControl(TaskListHeaderStyle),
     legendStyle: styleControl(TaskListTableStyle),
     tooltipStyle: styleControl(TooltipStyle),
@@ -540,7 +539,6 @@ let GanttChartCompBase = (function () {
 
   return new UICompBuilder(childrenMap, (props: {
     data: Task[];
-    ganttTasks: any;
     autoHeight: boolean;
     styles: any;
     onEvent: any;
@@ -562,15 +560,12 @@ let GanttChartCompBase = (function () {
     const { activeViewMode } = props;
     const [tasks, setTasks] = useState<Task[]>(props.data ?? []);
     const [dimensions, setDimensions] = useState({ width: 480, height: 300 });
-    const [updatedGanttTasks, setUpdatedGanttTasks] = useState<Task[]>([]);
     const [previousData, setPreviousData] = useState<Task[]>(props?.data);
 
     // useMergeCompStyles(props as Record<string, any>, dispatch);
-const comp = useContext(EditorContext).getUICompByName(
+const comp = useContext(EditorContext)?.getUICompByName(
   useContext(CompNameContext)
 );
-        console.log('🚀 ~ GanttChartCompBase ~ comp:', comp);
-
     const { width, height, ref: conRef } = useResizeDetector({
       onResize: () => {
         const container = conRef.current;
@@ -601,18 +596,18 @@ const comp = useContext(EditorContext).getUICompByName(
         }
     }, [props.data])
 
-    useEffect(() => {
-      props.ganttTasks.onChange(updatedGanttTasks);
-    }, [updatedGanttTasks]);
     const updateGanttTasks = (newTasks: Task[], taskId: string) => {
       const filteredTasks = newTasks.map(filterTaskFields);
       filteredTasks.currentChangedTask = taskId;
-      setUpdatedGanttTasks(filteredTasks);
+      setTasks(filteredTasks);
       props.onEvent("handleTaskUpdate");
       comp?.children.comp.children?.data.children.manual.children.manual.dispatch(
         comp?.children.comp.children?.data.children.manual.children.manual.setChildrensAction(
           newTasks
         )
+      );
+      comp.children?.comp.children?.data.children.mapData.children.data.dispatchChangeValueAction(
+        JSON.stringify(newTasks)
       );
     };
 
@@ -801,15 +796,15 @@ GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
       ],
     },
     execute: (comp: any, values: any[]) => {
-      console.log("🚀 ~ values:", values)
       const newTasks = values;
-      console.log("🚀 ~ newTasks:", newTasks)
-      comp?.children.comp.children?.data.children.manual.children.manual.dispatch(
-        comp?.children.comp.children?.data.children.manual.children.manual.setChildrensAction(
+      comp.children?.data.children.manual.children.manual.dispatch(
+        comp.children?.data.children.manual.children.manual.setChildrensAction(
           newTasks
         )
       );
-      // comp.children.data.dispatchChangeValueAction(JSON.stringify(newTasks, null, 2));
+      comp.children?.data.children.mapData.children.data.dispatchChangeValueAction(
+        JSON.stringify(newTasks)
+      );
     },
   },
   {
@@ -825,7 +820,7 @@ GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
       ],
     },
     execute: (comp: any) => {
-      comp.children.updatedData.getView()
+      comp.children.data.getView()
     },
   },
   {
@@ -841,10 +836,13 @@ GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
       ],
     },
     execute: (comp: any) => {
-      comp?.children.comp.children?.data.children.manual.children.manual.dispatch(
-        comp?.children.comp.children?.data.children.manual.children.manual.setChildrensAction(
+      comp.children?.data.children.manual.children.manual.dispatch(
+        comp.children?.data.children.manual.children.manual.setChildrensAction(
           i18nObjs.defaultTasks
         )
+      );
+      comp.children?.data.children.mapData.children.data.dispatchChangeValueAction(
+        JSON.stringify([])
       );
     },
   },
@@ -852,6 +850,5 @@ GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
 
 export default withExposingConfigs(GanttChartCompBase, [
   new NameConfig("data", trans("component.data")),
-  new NameConfig("ganttTasks", trans("component.data")),
   NameConfigHidden,
 ]);
