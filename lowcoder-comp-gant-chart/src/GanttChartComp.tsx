@@ -491,7 +491,7 @@ GanttOption = class extends GanttOption implements OptionCompProperty {
 
 export const GanttOptionControl = optionsControl(GanttOption, {
   initOptions: i18nObjs.defaultTasks,
-  uniqField: "label",
+  uniqField: "id",
 });
 
 const viewModeOptions = [
@@ -561,23 +561,11 @@ let GanttChartCompBase = (function () {
     const [tasks, setTasks] = useState<Task[]>(props.data ?? []);
     const [dimensions, setDimensions] = useState({ width: 480, height: 300 });
     const [previousData, setPreviousData] = useState<Task[]>(props?.data);
-
     // useMergeCompStyles(props as Record<string, any>, dispatch);
 const comp = useContext(EditorContext)?.getUICompByName(
   useContext(CompNameContext)
 );
-    const { width, height, ref: conRef } = useResizeDetector({
-      onResize: () => {
-        const container = conRef.current;
-        if (!container || !width || !height) return;
-
-        if (props.autoHeight) {
-          setDimensions({ width, height: dimensions.height });
-          return;
-        }
-        setDimensions({ width, height });
-      },
-    });
+    const {ref: conRef } = useResizeDetector({});
 
     useEffect(() => {
       if (!_.isEqual(previousData, props.data)) {
@@ -597,10 +585,7 @@ const comp = useContext(EditorContext)?.getUICompByName(
     }, [props.data])
 
     const updateGanttTasks = (newTasks: Task[], taskId: string) => {
-      const filteredTasks = newTasks.map(filterTaskFields);
-      filteredTasks.currentChangedTask = taskId;
-      setTasks(filteredTasks);
-      props.onEvent("handleTaskUpdate");
+      setTasks(newTasks);
       comp?.children.comp.children?.data.children.manual.children.manual.dispatch(
         comp?.children.comp.children?.data.children.manual.children.manual.setChildrensAction(
           newTasks
@@ -626,7 +611,7 @@ const comp = useContext(EditorContext)?.getUICompByName(
           );
         }
       }
-      setTasks(newTasks);
+      // setTasks(newTasks);
       updateGanttTasks(newTasks, task.id);
       props.onEvent("handleTaskDateChange");
       return true;  // Confirm operation
@@ -636,7 +621,6 @@ const comp = useContext(EditorContext)?.getUICompByName(
       const conf = window.confirm("Are you sure about " + task.label + " ?");
       if (conf) {
         const newTasks = tasks.filter(t => t.id !== task.id);
-        setTasks(newTasks);
         updateGanttTasks(newTasks, task.id);
         props.onEvent("handleTaskDelete");
         return true;  // Confirm operation
@@ -646,7 +630,6 @@ const comp = useContext(EditorContext)?.getUICompByName(
 
     const handleProgressChange = async (task: Task) => {
       const newTasks = tasks.map(t => (t.id === task.id ? task : t));
-      setTasks(newTasks);
       updateGanttTasks(newTasks, task.id);
       props.onEvent("handleProgressChange");
       return true;  // Confirm operation
@@ -669,7 +652,6 @@ const comp = useContext(EditorContext)?.getUICompByName(
 
     const handleExpanderClick = (task: Task) => {
       const newTasks = tasks.map(t => (t.id === task.id ? task : t));
-      setTasks(newTasks);
       updateGanttTasks(newTasks, task.id);
       return true;  // Confirm operation
     };
