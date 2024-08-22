@@ -1,5 +1,5 @@
 import {
-  UICompBuilder,
+  ContainerCompBuilder,
   Section,
   withDefault,
   withExposingConfigs,
@@ -15,7 +15,12 @@ import {
   StringControl,
   NumberControl,
   optionsControl,
-} from "lowcoder-sdk";
+  EditorContext,
+  CompNameContext,
+  InnerGrid,
+  HintPlaceHolder,
+  gridItemCompToGridItems,
+} from 'lowcoder-sdk';
 import "./index.css";
 import { extend, addClass, registerLicense } from "@syncfusion/ej2-base";
 import "./material3.css";
@@ -31,7 +36,7 @@ import {
 import * as dataSource from "./datasource.json";
 import type { MenuProps } from "antd";
 import { trans } from "./i18n/comps";
-import { useState } from "react";
+import { useContext, useState } from "react";
 registerLicense(
   "ORg4AjUWIQA/Gnt2UFhhQlJBfV5AQmBIYVp/TGpJfl96cVxMZVVBJAtUQF1hTX5Vd0ViX3pfdXRRR2VY"
 );
@@ -241,7 +246,13 @@ const childrenMap = {
   // data: jsonValueExposingStateControl("data", dataSource.cardData),
 };
 let ContainerBaseComp = (function () {
-  return new UICompBuilder(childrenMap, (props: any) => {
+    console.log('version: 0.0.2, meenams-kanban-updated-component-kanban-1');
+
+  return new ContainerCompBuilder(childrenMap, (props: any) => {
+     console.log("🚀 ~ returnnewContainerCompBuilder ~ props:", props)
+     
+            const {items:containerItems, ...otherContainerProps} = props.container;
+
     let data: Object[] = extend(
       [],
       props.data as { [key: string]: Object },
@@ -287,10 +298,28 @@ let ContainerBaseComp = (function () {
     };
 
     const cardTemplate = (data: { [key: string]: string }) => {
-      return (
+      const editorState = useContext(EditorContext);
+      return editorState ? (
+        <InnerGrid
+          {...otherContainerProps}
+          emptyRows={15}
+          hintPlaceholder={HintPlaceHolder}
+          enableGridLines={false}
+          items={gridItemCompToGridItems(containerItems)}
+          // dispatch={props.container.dispatch}
+          positionParams={{
+            margin: [0, 0],
+            containerPadding: [0, 0],
+            containerWidth: 686,
+            cols: 24,
+            rowHeight: 8,
+            maxRows: null,
+          }}
+        />
+      ) : (
         <Wrapper>
           <div
-            className={"card-template"}
+            className={'card-template'}
             style={{
               backgroundColor: props.cardContentStyles.backgroundColor,
               borderRadius: props.cardContentStyles.radius,
@@ -326,7 +355,7 @@ let ContainerBaseComp = (function () {
               </div>
             </div>
             <div className="e-card-custom-footer">
-              {data.Tags.split(",").map((tag: string) => (
+              {data.Tags.split(',').map((tag: string) => (
                 <div
                   className="e-card-tag-field e-tooltip-text"
                   style={{
@@ -447,7 +476,7 @@ let ContainerBaseComp = (function () {
           <Flex vertical gap={10}>
             <Typography.Title level={5}>Title</Typography.Title>
             <Input
-              placeholder={"Title"}
+              placeholder={'Title'}
               onChange={(e) =>
                 setDialogData((prev) => ({...prev, Title: e.target.value}))
               }
@@ -459,7 +488,7 @@ let ContainerBaseComp = (function () {
             <Dropdown menu={dialogData.Status as any} /> */}
             <Typography.Title level={5}>Summary</Typography.Title>
             <Input
-              placeholder={"Summary"}
+              placeholder={'Summary'}
               onChange={(e) =>
                 setDialogData((prev) => ({...prev, Summary: e.target.value}))
               }
@@ -467,7 +496,7 @@ let ContainerBaseComp = (function () {
             />
             <Typography.Title level={5}>Tags</Typography.Title>
             <Input
-              placeholder={"Tags"}
+              placeholder={'Tags'}
               onChange={(e) =>
                 setDialogData((prev) => ({...prev, Tags: e.target.value}))
               }
@@ -477,13 +506,13 @@ let ContainerBaseComp = (function () {
         </Modal>
         <div
           className="col-lg-12 control-section"
-          style={{ height: `100%`, width: `100%` }}
+          style={{height: `100%`, width: `100%`}}
         >
           <ScrollBar
             style={{
-              height: props.autoHeight ? "auto" : "100%",
-              margin: "0px",
-              padding: "0px",
+              height: props.autoHeight ? 'auto' : '100%',
+              margin: '0px',
+              padding: '0px',
             }}
             hideScrollbar={!props.scrollbars}
           >
@@ -494,13 +523,32 @@ let ContainerBaseComp = (function () {
                 keyField="Status"
                 dataSource={data}
                 // enableTooltip={true}
-                cardDoubleClick={OnCardDoubleClick}
-                swimlaneSettings={{keyField: "Assignee"}}
+                // cardDoubleClick={OnCardDoubleClick}
+                swimlaneSettings={{keyField: 'Assignee'}}
                 actionComplete={handleDataChange}
                 cardSettings={{
-                  headerField: "Title",
-                  template: cardTemplate,
-                  selectionType: "Multiple",
+                  headerField: 'Title',
+                  template:cardTemplate,
+                  // template: editorState ? (
+                  //   <InnerGrid
+                  //     emptyRows={15}
+                  //     hintPlaceholder={HintPlaceHolder}
+                  //     enableGridLines={false}
+                  //     // items={gridItemCompToGridItems({})}
+                  //     items={{}}
+                  //     positionParams={{
+                  //       margin: [0, 0],
+                  //       containerPadding: [0, 0],
+                  //       containerWidth: 686,
+                  //       cols: 24,
+                  //       rowHeight: 8,
+                  //       maxRows: null,
+                  //     }}
+                  //   />
+                  // ) : (
+                  //   cardTemplate
+                  // ),
+                  selectionType: 'Multiple',
                 }}
                 dialogOpen={showModal}
                 // dialogSettings={{ fields: fields }}
