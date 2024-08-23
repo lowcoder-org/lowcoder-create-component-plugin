@@ -7,8 +7,11 @@ import {
   NameConfig,
   jsonValueExposingStateControl,
   withMethodExposing,
+  eventHandlerControl,
+  styleControl,
+  styled,
 } from 'lowcoder-sdk';
-import {Excalidraw} from '@excalidraw/excalidraw';
+import {Excalidraw, MainMenu} from '@excalidraw/excalidraw';
 import {useState, useRef, useEffect} from 'react';
 import {trans} from './i18n/comps';
 import isEqual from 'lodash/isEqual';
@@ -52,14 +55,61 @@ const defaultData = {
   },
   files: {},
 };
+export const CompStyles = [
+  {
+    name: 'margin',
+    label: trans('style.margin'),
+    margin: 'margin',
+  },
+  {
+    name: 'padding',
+    label: trans('style.padding'),
+    padding: 'padding',
+  },
+  {
+    name: 'border',
+    label: trans('style.border'),
+    border: 'border',
+  },
+  {
+    name: 'radius',
+    label: trans('style.borderRadius'),
+    radius: 'radius',
+  },
+  {
+    name: 'borderWidth',
+    label: trans('style.borderWidth'),
+    borderWidth: 'borderWidth',
+  },
+  {
+    name: 'borderStyle',
+    label: trans('style.borderStyle'),
+    borderStyle: 'borderStyle',
+  },
+  {
+    name: 'boxShadow',
+    label: trans('style.boxShadow'),
+    boxShadow: 'boxShadow',
+  },
+] as const;
+const Wrapper = styled.div<{$styles: any}>`
+  ${(props: any) => props.$styles}
+`;
 let ExcalidrawCompBase = (function () {
   const childrenMap = {
     autoHeight: withDefault(AutoHeightControl, 'auto'),
     data: jsonValueExposingStateControl('data', defaultData),
+    onEvent: eventHandlerControl([
+      {
+        label: 'onChange',
+        value: 'change',
+        description: 'Triggers when data changes',
+      },
+    ] as const),
+    styles: styleControl(CompStyles),
   };
 
   return new UICompBuilder(childrenMap, (props: any) => {
-    console.log('🚀 ~ returnnewUICompBuilder ~ props:', props);
     const previousDrawRef = useRef({});
     const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null);
     const [dimensions, setDimensions] = useState({width: 480, height: 600});
@@ -86,7 +136,9 @@ let ExcalidrawCompBase = (function () {
         });
       },
     });
-
+const handleDataChange = () => {
+  props.onEvent('change');
+};
     useEffect(() => {
       if (
         excalidrawAPI &&
@@ -109,7 +161,18 @@ let ExcalidrawCompBase = (function () {
           width: `100%`,
         }}
       >
-        <div style={{height: dimensions.height, width: dimensions.width}}>
+        <Wrapper
+          $styles={{
+            height: dimensions.height,
+            width: dimensions.width,
+            margin: props.styles.margin,
+            padding: props.styles.padding,
+            boxShadow: props.styles.boxShadow,
+            border: `${props.styles.borderWidth} ${props.styles.borderStyle} ${props.styles.border}`,
+            borderRadius: props.styles.radius,
+          }}
+          onClick={handleDataChange}
+        >
           <Excalidraw
             isCollaborating={false}
             initialData={props.data.value}
@@ -132,8 +195,15 @@ let ExcalidrawCompBase = (function () {
                 props.data.onChange(draw);
               }
             }}
-          />
-        </div>
+          >
+            <MainMenu>
+              <MainMenu.DefaultItems.LoadScene />
+              <MainMenu.DefaultItems.ToggleTheme />
+              <MainMenu.DefaultItems.ClearCanvas />
+              <MainMenu.DefaultItems.ChangeCanvasBackground />
+            </MainMenu>
+          </Excalidraw>
+        </Wrapper>
       </div>
     );
   })
@@ -143,8 +213,12 @@ let ExcalidrawCompBase = (function () {
           <Section name="Basic">
             {children.data.propertyView({label: 'Data'})}
           </Section>
+          <Section name="Interaction">
+            {children.onEvent.propertyView()}
+          </Section>
           <Section name="Styles">
             {children.autoHeight.getPropertyView()}
+            {children.styles.getPropertyView()}
           </Section>
         </>
       );

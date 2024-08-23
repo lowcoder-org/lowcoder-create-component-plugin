@@ -6,6 +6,8 @@ export const en = {
     "border": "Border Color",
     "borderRadius": "Border Radius",
     "borderWidth": "Border Width",
+    "borderStyle": "Border Style",
+    "boxShadow": "Box Shadow",
     "backgroundColor": "Background Color",
     "headerBackground": "Header Background",
     "footerBackground": "Footer Background",
