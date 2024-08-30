@@ -1,5 +1,5 @@
 {
-  "name": "meenams-kanban-updated-component-kanban-1",
+  "name": "lowcoder-comp-kanban",
   "version": "0.0.2",
   "type": "module",
   "license": "MIT",
@@ -15,7 +15,7 @@
     "antd": "^5.19.1",
     "bootstrap": "^5.3.3",
     "lowcoder-cli": "^0.0.30",
-    "lowcoder-sdk": "^2.4.11",
+    "lowcoder-sdk": "/Users/raheeliftikhar/Work/lowcoder-main/client/packages/lowcoder-sdk",
     "prop-types": "^15.8.1",
     "react": "18",
     "react-bootstrap": "^2.10.2",
