@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { KanbanImplComp } from "./KabanComp";
 import {
   EditorContext,
@@ -54,7 +54,7 @@ const getString = (assignee: string): string => {
   return (assignee.match(/\b(\w)/g) as string[]).join("").toUpperCase();
 };
 
-const columnTemplate = (props: {
+const ColumnTemplate = React.memo((props: {
   data: { [key: string]: string },
   boardStyles: { [key: string]: string }
 }) => {
@@ -72,7 +72,7 @@ const columnTemplate = (props: {
       </div>
     </div>
   );
-};
+});
 
 const cardRendered = (props: {
   args: CardRenderedEventArgs,
@@ -88,7 +88,7 @@ const cardRendered = (props: {
   addClass([cardElement], val);
 };
 
-const cardTemplate = (props: {
+const CardTemplate = React.memo((props: {
   data: { [key: string]: string },
   cardIndex: number;
   childrenProps: any;
@@ -161,34 +161,37 @@ const cardTemplate = (props: {
       </div>
     </Wrapper>
   );
-};
+});
 
 type Props = {
   comp: InstanceType<typeof KanbanImplComp>;
 };
 
-export function KanbanCompView(props: Props) {
+export const KanbanCompView = React.memo((props: Props) => {
   const { comp } = props;
-  const childrenProps = childrenToProps(comp.children);
+  const childrenProps = useMemo(() => 
+    childrenToProps(comp.children),
+    [childrenToProps, comp.children],
+  );
   
   const [dataMap, setDataMap] = useState<Record<string, number>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const updateDataMap = () => {
+  const updateDataMap = useCallback(() => {
     const mapData: Record<string, number> = {};
     childrenProps.data?.forEach((item: any, index: number) => {
       mapData[item.Id] = index;
     })
     setDataMap(mapData);
-  }
+  }, [childrenProps.data, setDataMap]);
 
   useEffect(() => {
     updateDataMap();
-  }, []);
+  }, [updateDataMap]);
 
   useEffect(() => {
     updateDataMap();
-  }, [JSON.stringify(childrenProps.data)]);
+  }, [JSON.stringify(childrenProps.data), updateDataMap]);
 
   console.log("🚀 ~ returnnewContainerCompBuilder ~ props:", props)
   
@@ -293,6 +296,7 @@ export function KanbanCompView(props: Props) {
         onOk={handleOk}
         onCancel={handleCancel}
         okText="Update"
+        maskClosable={false}
       >
         <Flex vertical gap={10}>
           <Typography.Title level={5}>Title</Typography.Title>
@@ -352,14 +356,16 @@ export function KanbanCompView(props: Props) {
                 headerField: 'Title',
                 template: (data: Record<string, string>) => {
                   const cardIndex = dataMap[data.Id] || 0;
-                  return cardTemplate({
-                    data,
-                    cardIndex,
-                    childrenProps,
-                    cardHeaderStyles: childrenProps.cardHeaderStyles,
-                    cardContentStyles: childrenProps.cardContentStyles,
-                    tagStyles: childrenProps.tagStyles,
-                  });
+                  return (
+                    <CardTemplate
+                      data={data}
+                      cardIndex={cardIndex}
+                      childrenProps={childrenProps}
+                      cardHeaderStyles={childrenProps.cardHeaderStyles}
+                      cardContentStyles={childrenProps.cardContentStyles}
+                      tagStyles={childrenProps.tagStyles}
+                    />
+                  );
                 },
                 selectionType: 'Multiple',
               }}
@@ -377,37 +383,33 @@ export function KanbanCompView(props: Props) {
                   headerText="To Do"
                   keyField="Open"
                   allowToggle={true}
-                  template={(data: Record<string, string>) => columnTemplate({
-                    data,
-                    boardStyles: childrenProps.boardStyles,
-                  })}
+                  template={(data: Record<string, string>) => (
+                    <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
+                  )}
                 />
                 <ColumnDirective
                   headerText="In Progress"
                   keyField="InProgress"
                   allowToggle={true}
-                  template={(data: Record<string, string>) => columnTemplate({
-                    data,
-                    boardStyles: childrenProps.boardStyles,
-                  })}
+                  template={(data: Record<string, string>) => (
+                    <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
+                  )}
                 />
                 <ColumnDirective
                   headerText="In Review"
                   keyField="Review"
                   allowToggle={true}
-                  template={(data: Record<string, string>) => columnTemplate({
-                    data,
-                    boardStyles: childrenProps.boardStyles,
-                  })}
+                  template={(data: Record<string, string>) => (
+                    <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
+                  )}
                 />
                 <ColumnDirective
                   headerText="Done"
                   keyField="Close"
                   allowToggle={true}
-                  template={(data: Record<string, string>) => columnTemplate({
-                    data,
-                    boardStyles: childrenProps.boardStyles,
-                  })}
+                  template={(data: Record<string, string>) => (
+                    <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
+                  )}
                 />
               </ColumnsDirective>
             </KanbanComponent>
@@ -420,4 +422,4 @@ export function KanbanCompView(props: Props) {
       </div>
     </div>
   );
-}
+})

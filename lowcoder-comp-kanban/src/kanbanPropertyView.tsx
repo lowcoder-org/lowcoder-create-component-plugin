@@ -3,12 +3,13 @@ import {
   Section,
 } from "lowcoder-sdk";
 import { KanbanImplComp } from "./KabanComp";
+import React from "react";
 
 type Props = {
   comp: InstanceType<typeof KanbanImplComp>;
 };
 
-export function KanbanPropertyView(props: Props) {
+export const KanbanPropertyView = React.memo((props: Props) => {
   const { comp } = props;
   const children = comp.children;
   return (
@@ -43,4 +44,4 @@ export function KanbanPropertyView(props: Props) {
 
     </>
   );
-}
+});
