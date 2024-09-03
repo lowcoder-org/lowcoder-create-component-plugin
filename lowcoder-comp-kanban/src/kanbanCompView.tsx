@@ -7,7 +7,7 @@ import {
   ScrollBar,
   SlotConfigContext,
 } from "lowcoder-sdk";
-import {  Modal, Input, Flex, Typography } from "antd";
+import {  Modal, Input, Flex, Typography, Dropdown, MenuProps, Select } from "antd";
 import { extend, addClass, registerLicense } from "@syncfusion/ej2-base";
 import {
   KanbanComponent,
@@ -205,6 +205,8 @@ export const KanbanCompView = React.memo((props: Props) => {
     true
   ) as Object[];
 
+  console.log(data);
+
   const fields: DialogFieldsModel[] = [
     { text: "ID", key: "Title", type: "TextBox" },
     { key: "Status", type: "DropDown" },
@@ -217,8 +219,6 @@ export const KanbanCompView = React.memo((props: Props) => {
   const OnCardDoubleClick = (args: CardClickEventArgs): void => {
     setDialogData({
       ...(args.data as any),
-      Status: getStatus(),
-      Assignee: getAllSigneed(),
     });
     showModal();
   };
@@ -228,14 +228,21 @@ export const KanbanCompView = React.memo((props: Props) => {
   };
 
   const getAllSigneed = () => {
-    return new Set(
-      data.map((item: any) => {
-        return {
-          label: item.Assignee,
-          key: item.Assignee,
-        };
-      })
-    ).values;
+    let assignees: any = [];
+    data.forEach((item: any) => {
+      let assignee = {
+        label: item.Assignee,
+        key: item.Assignee,
+        value: item.Assignee,
+      };
+      let isDuplicate = assignees.some(
+        (item: any) => JSON.stringify(item) === JSON.stringify(assignee)
+      );
+      if (!isDuplicate) {
+        assignees.push(assignee);
+      }
+    });
+    return assignees;
   };
 
   const getStatus = () => {
@@ -244,13 +251,13 @@ export const KanbanCompView = React.memo((props: Props) => {
       let status = {
         label: element?.Status,
         key: element?.Status,
+        value: element?.Status,
       };
       let isDuplicate = uniqueObjectsArray.some(
         (item: any) => JSON.stringify(item) === JSON.stringify(status)
       );
       if (!isDuplicate) {
         uniqueObjectsArray.push(status);
-        console.log(`Object added to the array:`, status);
       }
     });
     return uniqueObjectsArray;
@@ -258,8 +265,8 @@ export const KanbanCompView = React.memo((props: Props) => {
 
   const [dialogData, setDialogData] = useState({
     Title: "",
-    Status: getStatus(),
-    Assignee: getAllSigneed(),
+    Status: "",
+    Assignee: "",
     RankId: "",
     Summary: "",
     Tags: "",
@@ -277,8 +284,8 @@ export const KanbanCompView = React.memo((props: Props) => {
     setIsModalOpen(false);
     setDialogData({
       Title: '',
-      Status: getStatus(),
-      Assignee: getAllSigneed(),
+      Status: '',
+      Assignee: '',
       RankId: '',
       Summary: '',
       Tags: '',
@@ -308,9 +315,24 @@ export const KanbanCompView = React.memo((props: Props) => {
             value={dialogData.Title}
           />
           <Typography.Title level={5}>Status</Typography.Title>
+          <Select
+            defaultValue={dialogData.Status}
+            // style={{ width: 120 }}
+            onChange={(value) =>
+              setDialogData((prev) => ({...prev, Status: value}))
+            }
+            options={getStatus()}
+          />
           {/* <Dropdown menu={{ menuItems }} trigger={["click"]} /> */}
-          {/* <Typography.Title level={5}>Assignee</Typography.Title>
-          <Dropdown menu={dialogData.Status as any} /> */}
+          <Typography.Title level={5}>Assignee</Typography.Title>
+          <Select
+            defaultValue={dialogData.Assignee}
+            // style={{ width: 120 }}
+            onChange={(value) =>
+              setDialogData((prev) => ({...prev, Assignee: value}))
+            }
+            options={getAllSigneed()}
+          />
           <Typography.Title level={5}>Summary</Typography.Title>
           <Input
             placeholder={'Summary'}
@@ -348,7 +370,7 @@ export const KanbanCompView = React.memo((props: Props) => {
               keyField="Status"
               dataSource={data}
               // enableTooltip={true}
-              // cardDoubleClick={OnCardDoubleClick}
+              cardDoubleClick={OnCardDoubleClick}
               cardClick={(args: CardClickEventArgs) => args.event?.stopPropagation()}
               swimlaneSettings={{keyField: 'Assignee'}}
               actionComplete={handleDataChange}
@@ -370,7 +392,7 @@ export const KanbanCompView = React.memo((props: Props) => {
                 selectionType: 'Multiple',
               }}
               dialogOpen={showModal}
-              // dialogSettings={{ fields: fields }}
+              dialogSettings={{ fields: fields }}
               cardRendered={(args: CardRenderedEventArgs) => {
                 return cardRendered({
                   args,
