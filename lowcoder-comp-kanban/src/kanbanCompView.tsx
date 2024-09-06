@@ -7,16 +7,15 @@ import {
   ScrollBar,
   SlotConfigContext,
 } from "lowcoder-sdk";
-import {  Modal, Input, Flex, Typography, Dropdown, MenuProps, Select } from "antd";
 import { extend, addClass, registerLicense } from "@syncfusion/ej2-base";
 import {
   KanbanComponent,
   ColumnsDirective,
   ColumnDirective,
-  DialogFieldsModel,
   CardRenderedEventArgs,
   CardClickEventArgs,
 } from "@syncfusion/ej2-react-kanban";
+import KanbanCardModal from "./kanbanCardModal";
 import "./index.css";
 import "./material3.css";
 
@@ -78,7 +77,7 @@ const cardRendered = (props: {
   args: CardRenderedEventArgs,
   cardContentStyles: Record<string, string>,
 }): void => {
-  let val: string = (props.args.data as { [key: string]: Object }).Priority as string;
+  let val: string = (props.args.data as { [key: string]: Object }).priority as string;
   let cardElement = props.args.element as HTMLElement;
   cardElement.style.backgroundColor = props.cardContentStyles.backgroundColor;
   cardElement.style.borderRadius = props.cardContentStyles.radius;
@@ -91,15 +90,14 @@ const cardRendered = (props: {
 const CardTemplate = React.memo((props: {
   data: { [key: string]: string },
   cardIndex: number;
-  childrenProps: any;
+  cardView: any;
   cardHeaderStyles: Record<string, string>;
   cardContentStyles: Record<string, string>;
   tagStyles: Record<string, string>;
 }) => {
-  // const { items, ...otherContainerProps } = props.container;
   const editorState = useContext(EditorContext);
   if (editorState) {
-    return props.childrenProps.cardView.cardViewConfig.cardTemplate(
+    return props.cardView.cardViewConfig.cardTemplate(
       props.data,
       props.cardIndex,
     );
@@ -125,7 +123,7 @@ const CardTemplate = React.memo((props: {
                 color: props.cardHeaderStyles.textColor,
               }}
             >
-              {props.data.Title}
+              {props.data.label}
             </div>
           </div>
         </div>
@@ -140,11 +138,11 @@ const CardTemplate = React.memo((props: {
               borderWidth: props.cardContentStyles.borderWidth,
             }}
           >
-            {props.data.Summary}
+            {props.data.summary}
           </div>
         </div>
         <div className="e-card-custom-footer">
-          {props.data.Tags.split(',').map((tag: string) => (
+          {props.data.tags.split(',').map((tag: string) => (
             <div
               className="e-card-tag-field e-tooltip-text"
               style={{
@@ -156,7 +154,7 @@ const CardTemplate = React.memo((props: {
               {tag}
             </div>
           ))}
-          <div className="e-card-avatar">{getString(props.data.Assignee)}</div>
+          <div className="e-card-avatar">{getString(props.data.assignee)}</div>
         </div>
       </div>
     </Wrapper>
@@ -169,13 +167,17 @@ type Props = {
 
 export const KanbanCompView = React.memo((props: Props) => {
   const { comp } = props;
-  const childrenProps = useMemo(() => 
-    childrenToProps(comp.children),
-    [childrenToProps, comp.children],
-  );
+
+  // const childrenProps = useMemo(() => 
+  //   childrenToProps(comp.children),
+  //   [childrenToProps, comp.children],
+  // );
+
+  const childrenProps = childrenToProps(comp.children);
   
   const [dataMap, setDataMap] = useState<Record<string, number>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dialogData, setDialogData] = useState<Record<string,string>>({});
 
   const updateDataMap = useCallback(() => {
     const mapData: Record<string, number> = {};
@@ -183,7 +185,7 @@ export const KanbanCompView = React.memo((props: Props) => {
       mapData[item.Id] = index;
     })
     setDataMap(mapData);
-  }, [childrenProps.data, setDataMap]);
+  }, [ setDataMap]);
 
   useEffect(() => {
     updateDataMap();
@@ -193,47 +195,35 @@ export const KanbanCompView = React.memo((props: Props) => {
     updateDataMap();
   }, [JSON.stringify(childrenProps.data), updateDataMap]);
 
-  console.log("🚀 ~ returnnewContainerCompBuilder ~ props:", props)
-  
-  // const { items, ...otherContainerProps } = childrenProps.container
-  // const {items:containerItems, ...otherContainerProps} = childrenProps.container;
+  let data: Object[] = useMemo(() => extend(
+      [],
+      childrenProps.data as { [key: string]: Object },
+      undefined,
+      true
+    ) as Object[]
+    , [childrenProps.data]
+  );
 
-  let data: Object[] = extend(
-    [],
-    childrenProps.data as { [key: string]: Object },
-    undefined,
-    true
-  ) as Object[];
+  const showModal = useCallback(() => {
+    setIsModalOpen(true);
+  }, [setIsModalOpen]);
 
-  console.log(data);
-
-  const fields: DialogFieldsModel[] = [
-    { text: "ID", key: "Title", type: "TextBox" },
-    { key: "Status", type: "DropDown" },
-    { key: "Assignee", type: "DropDown" },
-    { key: "RankId", type: "TextBox" },
-    { key: "Summary", type: "TextArea" },
-    { key: "Tags", type: "TextArea" },
-  ];
-
-  const OnCardDoubleClick = (args: CardClickEventArgs): void => {
+  const OnCardDoubleClick = useCallback((args: CardClickEventArgs): void => {
     setDialogData({
       ...(args.data as any),
     });
-    showModal();
-  };
+    setTimeout(() => {
+      showModal();
+    }, 100)
+  }, [setDialogData, showModal]);
 
-  const handleDataChange = () => {
-    childrenProps.onEvent("change");
-  };
-
-  const getAllSigneed = () => {
+  const assigneeOptions = useMemo(() => {
     let assignees: any = [];
-    data.forEach((item: any) => {
+    childrenProps.assigneeOptions.forEach((item: any) => {
       let assignee = {
-        label: item.Assignee,
-        key: item.Assignee,
-        value: item.Assignee,
+        label: item.name,
+        value: item.name,
+        key: item.id,
       };
       let isDuplicate = assignees.some(
         (item: any) => JSON.stringify(item) === JSON.stringify(assignee)
@@ -243,15 +233,15 @@ export const KanbanCompView = React.memo((props: Props) => {
       }
     });
     return assignees;
-  };
+  }, [childrenProps.assigneeOptions]);
 
-  const getStatus = () => {
+  const statusOptions = useMemo(() => {
     let uniqueObjectsArray: any = [];
-    data.forEach((element: any) => {
+    childrenProps.statusOptions.forEach((statusOption: any) => {
       let status = {
-        label: element?.Status,
-        key: element?.Status,
-        value: element?.Status,
+        label: statusOption?.label,
+        key: statusOption?.value,
+        value: statusOption?.value,
       };
       let isDuplicate = uniqueObjectsArray.some(
         (item: any) => JSON.stringify(item) === JSON.stringify(status)
@@ -259,189 +249,143 @@ export const KanbanCompView = React.memo((props: Props) => {
       if (!isDuplicate) {
         uniqueObjectsArray.push(status);
       }
-    });
+    }); 
     return uniqueObjectsArray;
+  }, [childrenProps.statusOptions]);
+
+  const handleDataChange = (kanbanData: Array<Record<string,any>>) => {
+    comp.children?.data.children.manual.children.manual.dispatch(
+      comp.children?.data.children.manual.children.manual.setChildrensAction(
+        kanbanData
+      )
+    );
+    comp.children?.data.children.mapData.children.data.dispatchChangeValueAction(
+      JSON.stringify(kanbanData)
+    );
+    
+    childrenProps.onEvent("change");
   };
 
-  const [dialogData, setDialogData] = useState({
-    Title: "",
-    Status: "",
-    Assignee: "",
-    RankId: "",
-    Summary: "",
-    Tags: "",
-  });
+  const handleActionComplete = ({
+    changedRecords,
+  }: {
+    changedRecords : Array<Record<string,any>>
+  }) => {
+    const updatedData = [ ...data ] as Array<Record<string,any>>;
+    changedRecords.forEach((record) => {
+      const { id } = record;
+      const index = updatedData.findIndex((item: any) => item.id === id);
+      if (index > -1) {
+        updatedData[index] = record;
+      }
+    });
+    handleDataChange(updatedData);
+  }
 
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleOk = () => {
+  const handleOk = (dialogData: Record<string, string>) => {
+    const { id } = dialogData;
+    const updatedData = [ ...data ];
+    const index = updatedData.findIndex((item: any) => item.id === id);
+    if (index > -1) {
+      updatedData[index] = dialogData;
+      handleDataChange(updatedData);
+    }
     setIsModalOpen(false);
-  };
-
+  }
+  
   const handleCancel = () => {
     setIsModalOpen(false);
-    setDialogData({
-      Title: '',
-      Status: '',
-      Assignee: '',
-      RankId: '',
-      Summary: '',
-      Tags: '',
-    });
-  };
+  }
+
+  const cardSettings = useMemo(() => ({
+    headerField: 'label',
+    template: (data: Record<string, string>) => {
+      const cardIndex = dataMap[data.id] || 0;
+      return (
+        <CardTemplate
+          data={data}
+          cardIndex={cardIndex}
+          cardView={childrenProps.cardView}
+          cardHeaderStyles={childrenProps.cardHeaderStyles}
+          cardContentStyles={childrenProps.cardContentStyles}
+          tagStyles={childrenProps.tagStyles}
+        />
+      );
+    },
+  }), [
+    dataMap,
+    childrenProps.cardView,
+    childrenProps.cardHeaderStyles,
+    childrenProps.cardContentStyles,
+    childrenProps.tagStyles,
+  ]);
 
   return (
-    <div
-      className="schedule-control-section"
-      style={{height: `100%`, width: `100%`}}
-    >
-      <Modal
-        title="Edit Task"
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        okText="Update"
-        maskClosable={false}
-      >
-        <Flex vertical gap={10}>
-          <Typography.Title level={5}>Title</Typography.Title>
-          <Input
-            placeholder={'Title'}
-            onChange={(e) =>
-              setDialogData((prev) => ({...prev, Title: e.target.value}))
-            }
-            value={dialogData.Title}
-          />
-          <Typography.Title level={5}>Status</Typography.Title>
-          <Select
-            defaultValue={dialogData.Status}
-            // style={{ width: 120 }}
-            onChange={(value) =>
-              setDialogData((prev) => ({...prev, Status: value}))
-            }
-            options={getStatus()}
-          />
-          {/* <Dropdown menu={{ menuItems }} trigger={["click"]} /> */}
-          <Typography.Title level={5}>Assignee</Typography.Title>
-          <Select
-            defaultValue={dialogData.Assignee}
-            // style={{ width: 120 }}
-            onChange={(value) =>
-              setDialogData((prev) => ({...prev, Assignee: value}))
-            }
-            options={getAllSigneed()}
-          />
-          <Typography.Title level={5}>Summary</Typography.Title>
-          <Input
-            placeholder={'Summary'}
-            onChange={(e) =>
-              setDialogData((prev) => ({...prev, Summary: e.target.value}))
-            }
-            value={dialogData.Summary}
-          />
-          <Typography.Title level={5}>Tags</Typography.Title>
-          <Input
-            placeholder={'Tags'}
-            onChange={(e) =>
-              setDialogData((prev) => ({...prev, Tags: e.target.value}))
-            }
-            value={dialogData.Tags}
-          />
-        </Flex>
-      </Modal>
+    <>
       <div
-        className="col-lg-12 control-section"
+        className="schedule-control-section"
         style={{height: `100%`, width: `100%`}}
       >
-        <ScrollBar
-          style={{
-            height: childrenProps.autoHeight ? 'auto' : '100%',
-            margin: '0px',
-            padding: '0px',
-          }}
-          hideScrollbar={!childrenProps.scrollbars}
+        <div
+          className="col-lg-12 control-section"
+          style={{height: `100%`, width: `100%`}}
         >
-          <LayoutContainer>
-            <KanbanComponent
-              id="kanban"
-              cssClass="kanban-overview"
-              keyField="Status"
-              dataSource={data}
-              // enableTooltip={true}
-              cardDoubleClick={OnCardDoubleClick}
-              cardClick={(args: CardClickEventArgs) => args.event?.stopPropagation()}
-              swimlaneSettings={{keyField: 'Assignee'}}
-              actionComplete={handleDataChange}
-              cardSettings={{
-                headerField: 'Title',
-                template: (data: Record<string, string>) => {
-                  const cardIndex = dataMap[data.Id] || 0;
-                  return (
-                    <CardTemplate
-                      data={data}
-                      cardIndex={cardIndex}
-                      childrenProps={childrenProps}
-                      cardHeaderStyles={childrenProps.cardHeaderStyles}
-                      cardContentStyles={childrenProps.cardContentStyles}
-                      tagStyles={childrenProps.tagStyles}
+          <ScrollBar
+            style={{
+              height: childrenProps.autoHeight ? 'auto' : '100%',
+              margin: '0px',
+              padding: '0px',
+            }}
+            hideScrollbar={!childrenProps.scrollbars}
+          >
+            <LayoutContainer>
+              <KanbanComponent
+                id="kanban"
+                cssClass="kanban-overview"
+                keyField="status"
+                dataSource={data}
+                cardDoubleClick={OnCardDoubleClick}
+                cardClick={(args: CardClickEventArgs) => args.event?.stopPropagation()}
+                swimlaneSettings={{keyField: 'assignee'}}
+                actionComplete={handleActionComplete}
+                cardSettings={cardSettings}
+                cardRendered={(args: CardRenderedEventArgs) => {
+                  return cardRendered({
+                    args,
+                    cardContentStyles: childrenProps.cardContentStyles,
+                  })
+                }}
+              >
+                <ColumnsDirective>
+                  {childrenProps.statusOptions.map((statusOption: any) => (
+                    <ColumnDirective
+                      key={statusOption.value}
+                      headerText={statusOption.label}
+                      keyField={statusOption.value}
+                      allowToggle={true}
+                      template={(data: Record<string, string>) => (
+                        <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
+                      )}
                     />
-                  );
-                },
-                selectionType: 'Multiple',
-              }}
-              dialogOpen={showModal}
-              dialogSettings={{ fields: fields }}
-              cardRendered={(args: CardRenderedEventArgs) => {
-                return cardRendered({
-                  args,
-                  cardContentStyles: childrenProps.cardContentStyles,
-                })
-              }}
-            >
-              <ColumnsDirective>
-                <ColumnDirective
-                  headerText="To Do"
-                  keyField="Open"
-                  allowToggle={true}
-                  template={(data: Record<string, string>) => (
-                    <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
-                  )}
-                />
-                <ColumnDirective
-                  headerText="In Progress"
-                  keyField="InProgress"
-                  allowToggle={true}
-                  template={(data: Record<string, string>) => (
-                    <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
-                  )}
-                />
-                <ColumnDirective
-                  headerText="In Review"
-                  keyField="Review"
-                  allowToggle={true}
-                  template={(data: Record<string, string>) => (
-                    <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
-                  )}
-                />
-                <ColumnDirective
-                  headerText="Done"
-                  keyField="Close"
-                  allowToggle={true}
-                  template={(data: Record<string, string>) => (
-                    <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
-                  )}
-                />
-              </ColumnsDirective>
-            </KanbanComponent>
-          </LayoutContainer>
-        </ScrollBar>
-        <SlotConfigContext.Provider value={{ modalWidth: 600 }}>
-          {childrenProps.cardView.expandModalView}
-        </SlotConfigContext.Provider>
-        {/* </Wrapper> */}
+                  ))}
+                </ColumnsDirective>
+              </KanbanComponent>
+            </LayoutContainer>
+          </ScrollBar>
+          <SlotConfigContext.Provider value={{ modalWidth: 600 }}>
+            {childrenProps.cardView.expandModalView}
+          </SlotConfigContext.Provider>
+        </div>
       </div>
-    </div>
+
+      <KanbanCardModal
+        open={isModalOpen}
+        data={dialogData}
+        statusOptions={statusOptions}
+        assigneeOptions={assigneeOptions}
+        onOk={(data) => handleOk(data)}
+        onCancel={handleCancel}
+      />
+    </>
   );
-})
+});

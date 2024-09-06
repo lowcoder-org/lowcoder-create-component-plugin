@@ -9,32 +9,32 @@ import * as dataSource from "./datasource.json";
 let KanbanOption = new MultiCompBuilder(
   {
     label: StringControl,
-    Title: StringControl,
-    Status: StringControl,
-    Summary: StringControl,
-    Type: StringControl,
-    Priority: StringControl,
-    Tags: StringControl,
-    Estimate: NumberControl,
-    Assignee: StringControl,
-    RankId: NumberControl,
-    Id: StringControl,
+    // Title: StringControl,
+    status: StringControl,
+    summary: StringControl,
+    type: StringControl,
+    priority: StringControl,
+    tags: StringControl,
+    estimate: NumberControl,
+    assignee: StringControl,
+    rankId: NumberControl,
+    id: StringControl,
   },
   (props: any) => props
 ).build();
 
 type OptionPropertyParam = {
   label?: string;
-  Title?: string;
-  Status?: string;
-  Summary?: string;
-  Type?: string;
-  Priority?: string;
-  Tags?: string;
-  Estimate?: number;
-  Assignee?: string;
-  RankId?: number;
-  Id?: number;
+  // Title?: string;
+  status?: string;
+  summary?: string;
+  type?: string;
+  priority?: string;
+  tags?: string;
+  estimate?: number;
+  assignee?: string;
+  rankId?: number;
+  id?: number;
 };
 
 interface OptionCompProperty {
@@ -48,37 +48,37 @@ KanbanOption = class extends KanbanOption implements OptionCompProperty {
         {this.children.label.propertyView({
           label: "Label",
         })}
-        {this.children.Title.propertyView({
+        {/* {this.children.Title.propertyView({
           label: "Title",
-        })}
-        {this.children.Status.propertyView({
+        })} */}
+        {this.children.status.propertyView({
           label: "Status",
         })}
-        {this.children.Summary.propertyView({
+        {this.children.summary.propertyView({
           label: "Summary",
         })}
 
-        {this.children.Type.propertyView({
+        {this.children.type.propertyView({
           label: "Type",
         })}
 
-        {this.children.Priority.propertyView({
+        {this.children.priority.propertyView({
           label: "Priority",
         })}
 
-        {this.children.Tags.propertyView({
+        {this.children.tags.propertyView({
           label: "Tags",
         })}
 
-        {this.children.Estimate.propertyView({
+        {this.children.estimate.propertyView({
           label: "Estimate",
         })}
 
-        {this.children.Assignee.propertyView({
+        {this.children.assignee.propertyView({
           label: "Assignee",
         })}
 
-        {this.children.RankId.propertyView({
+        {this.children.rankId.propertyView({
           label: "RankId",
         })}
       </>
@@ -88,5 +88,5 @@ KanbanOption = class extends KanbanOption implements OptionCompProperty {
 
 export const KanbanOptionControl = optionsControl(KanbanOption, {
   initOptions: dataSource.cardData,
-  uniqField: "Id",
+  uniqField: "id",
 });

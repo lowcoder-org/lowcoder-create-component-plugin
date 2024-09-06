@@ -65,7 +65,7 @@ let CardViewControlTmp = (function () {
           {children.cardView
             .getSelectedComp()
             .getComp()
-            .propertyView({ buttonText: "Card View" })
+            .propertyView({ buttonText: "Customize" })
           }
         </>
       );
