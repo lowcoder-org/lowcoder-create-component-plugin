@@ -1,26 +1,52 @@
 {
   "cardData": [
     {
-      "Id": "Task 1",
+      "id": "Task 1",
       "label": "Task - 29001",
-      "Title": "Task - 29001",
-      "Status": "Open",
-      "Summary": "Analyze customer requirements.",
-      "Priority": "High",
-      "Tags": "Bug, Release Bug",
-      "RankId": 1,
-      "Assignee": "Nancy Davloio"
+      "status": "Open",
+      "summary": "Analyze customer requirements.",
+      "priority": "High",
+      "tags": "Bug, Release Bug",
+      "rankId": 1,
+      "assignee": "Nancy Davloio"
     },
     {
-      "Id": "Task 2",
+      "id": "Task 2",
       "label": "Task - 29002",
-      "Title": "Task - 29002",
-      "Status": "InProgress",
-      "Summary": "Add responsive support to applicaton",
-      "Priority": "Low",
-      "Tags": "Story, Kanban",
-      "RankId": 1,
-      "Assignee": "Nancy Davloio"
+      "status": "InProgress",
+      "summary": "Add responsive support to applicaton",
+      "priority": "Low",
+      "tags": "Story, Kanban",
+      "rankId": 1,
+      "assignee": "Nancy Davloio"
+    }
+  ],
+  "statusOptions": [
+    {
+      "label": "To Do",
+      "value": "Open"
+    },
+    {
+      "label": "In Progress",
+      "value": "InProgress"
+    },
+    {
+      "label": "In Review",
+      "value": "Review"
+    },
+    {
+      "label": "Done",
+      "value": "Close"
+    }
+  ],
+  "assigneeOptions": [
+    {
+      "id": "1",
+      "name": "Nancy Davloio"
+    },
+    {
+      "id": "1",
+      "name": "Andrew Fuller"
     }
   ]
 }

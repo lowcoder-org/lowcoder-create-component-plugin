@@ -5,6 +5,8 @@ import {
   styleControl,
   AutoHeightControl,
   BoolControl,
+  jsonControl,
+  toJSONObjectArray,
   uiChildren,
   RecordConstructorToComp,
   RecordConstructorToView,
@@ -12,6 +14,7 @@ import {
 import { trans } from "./i18n/comps";
 import { KanbanOptionControl } from './kanbanOptionsControl';
 import { CardViewControl } from './cardViewControl';
+import * as dataSource from "./datasource.json";
 
 type RecordConstructorToComp<T> = typeof RecordConstructorToComp;
 type RecordConstructorToView<T> = typeof RecordConstructorToView;
@@ -117,8 +120,9 @@ const childrenMap = {
     },
   ] as const),
   cardContentStyles: styleControl(CompStyles),
+  statusOptions: jsonControl(toJSONObjectArray, dataSource.statusOptions),
+  assigneeOptions: jsonControl(toJSONObjectArray, dataSource.assigneeOptions),
   cardView: CardViewControl,
-  // data: jsonValueExposingStateControl("data", dataSource.cardData),
 };
 
 export const KanbanInitComp = (function () {

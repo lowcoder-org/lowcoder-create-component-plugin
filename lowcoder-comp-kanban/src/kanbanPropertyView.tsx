@@ -16,9 +16,16 @@ export const KanbanPropertyView = React.memo((props: Props) => {
     <>
       <Section name="Basic">
         {children.data.propertyView({})}
-        {/* {children.data.propertyView({ label: "Data" })} */}
-        {children.cardView.getPropertyView()}
+        {children.statusOptions.propertyView({
+          label: 'Status Options'
+        })}
+        {children.assigneeOptions.propertyView({
+          label: 'Assignee Options'
+        })}
       </Section>
+      <Section name="Card View">
+        {children.cardView.getPropertyView()}
+      </Section>  
       <Section name="Interaction">
         {children.onEvent.propertyView()}
       </Section>
