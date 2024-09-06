@@ -6,11 +6,13 @@ import {
   NameGenerator,
   withViewFn,
   withPropertyViewFn,
+  withMethodExposing,
 } from 'lowcoder-sdk';
 import { trans } from "./i18n/comps";
 import { KanbanInitComp } from './kanbanTypes';
 import { KanbanPropertyView } from './kanbanPropertyView';
 import { KanbanCompView } from './kanbanCompView';
+import * as datasource from './datasource.json';
 
 type IContainer = typeof IContainer;
 type NameGenerator = typeof NameGenerator;
@@ -45,9 +47,76 @@ export class KanbanImplComp extends KanbanInitComp implements IContainer {
 }
 
 const KanbanRenderComp = withViewFn(KanbanImplComp, (comp: KanbanImplComp) => <KanbanCompView comp={comp} />);
-const KanbanPropertyComp = withPropertyViewFn(KanbanRenderComp, (comp: KanbanImplComp) => {
+let KanbanPropertyComp = withPropertyViewFn(KanbanRenderComp, (comp: KanbanImplComp) => {
   return <KanbanPropertyView comp={comp} />;
 });
+
+KanbanPropertyComp = withMethodExposing(KanbanPropertyComp, [
+  {
+    method: {
+      name: "setData",
+      description: "Set Kanban Data",
+      params: [
+        {
+          name: "data",
+          type: "JSON",
+          description: "JSON value",
+        },
+      ],
+    },
+    execute: (comp: any, values: any[]) => {
+      const data = values;
+      comp.children?.data.children.manual.children.manual.dispatch(
+        comp.children?.data.children.manual.children.manual.setChildrensAction(
+          data
+        )
+      );
+      comp.children?.data.children.mapData.children.data.dispatchChangeValueAction(
+        JSON.stringify(data)
+      );
+    },
+  },
+  {
+    method: {
+      name: "getData",
+      description: "Get Kanban Data",
+      params: [
+        {
+          name: "data",
+          type: "JSON",
+          description: "JSON value",
+        },
+      ],
+    },
+    execute: (comp: any) => {
+      comp.children.data.getView()
+    },
+  },
+  {
+    method: {
+      name: "resetData",
+      description: "Reset Kanban Data",
+      params: [
+        {
+          name: "data",
+          type: "JSON",
+          description: "JSON value",
+        },
+      ],
+    },
+    execute: (comp: any) => {
+      comp.children?.data.children.manual.children.manual.dispatch(
+        comp.children?.data.children.manual.children.manual.setChildrensAction(
+          datasource.cardData
+        )
+      );
+      comp.children?.data.children.mapData.children.data.dispatchChangeValueAction(
+        JSON.stringify([])
+      );
+    },
+  },
+
+]);
 
 export default withExposingConfigs(KanbanPropertyComp, [
   new NameConfig("data", trans("component.data")),
