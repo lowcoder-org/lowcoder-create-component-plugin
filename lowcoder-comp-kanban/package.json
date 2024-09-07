@@ -1,6 +1,6 @@
 {
   "name": "lowcoder-comp-kanban",
-  "version": "0.0.3",
+  "version": "0.0.19",
   "type": "module",
   "license": "MIT",
   "dependencies": {
