@@ -96,11 +96,16 @@ const CardTemplate = React.memo((props: {
   tagStyles: Record<string, string>;
 }) => {
   const editorState = useContext(EditorContext);
-  if (editorState) {
-    return props.cardView.cardViewConfig.cardTemplate(
+
+  const template = useMemo(() => {
+    return props.cardView.cardTemplate(
       props.data,
       props.cardIndex,
-    );
+    )
+  }, [JSON.stringify(props.data), props.cardIndex]);
+
+  if (editorState) {
+    return template;
   }
 
   return (
@@ -167,12 +172,10 @@ type Props = {
 
 export const KanbanCompView = React.memo((props: Props) => {
   const { comp } = props;
-
   // const childrenProps = useMemo(() => 
   //   childrenToProps(comp.children),
   //   [childrenToProps, comp.children],
   // );
-
   const childrenProps = childrenToProps(comp.children);
   
   const [dataMap, setDataMap] = useState<Record<string, number>>({});
@@ -182,7 +185,7 @@ export const KanbanCompView = React.memo((props: Props) => {
   const updateDataMap = useCallback(() => {
     const mapData: Record<string, number> = {};
     childrenProps.data?.forEach((item: any, index: number) => {
-      mapData[item.Id] = index;
+      mapData[item.id] = index;
     })
     setDataMap(mapData);
   }, [ setDataMap]);
@@ -195,13 +198,13 @@ export const KanbanCompView = React.memo((props: Props) => {
     updateDataMap();
   }, [JSON.stringify(childrenProps.data), updateDataMap]);
 
-  let data: Object[] = useMemo(() => extend(
+  const kanbanData: Object[] = useMemo(() => extend(
       [],
       childrenProps.data as { [key: string]: Object },
       undefined,
       true
     ) as Object[]
-    , [childrenProps.data]
+    , [JSON.stringify(childrenProps.data)]
   );
 
   const showModal = useCallback(() => {
@@ -233,7 +236,7 @@ export const KanbanCompView = React.memo((props: Props) => {
       }
     });
     return assignees;
-  }, [childrenProps.assigneeOptions]);
+  }, [JSON.stringify(childrenProps.assigneeOptions)]);
 
   const statusOptions = useMemo(() => {
     let uniqueObjectsArray: any = [];
@@ -251,7 +254,7 @@ export const KanbanCompView = React.memo((props: Props) => {
       }
     }); 
     return uniqueObjectsArray;
-  }, [childrenProps.statusOptions]);
+  }, [JSON.stringify(childrenProps.statusOptions)]);
 
   const handleDataChange = (kanbanData: Array<Record<string,any>>) => {
     comp.children?.data.children.manual.children.manual.dispatch(
@@ -271,7 +274,7 @@ export const KanbanCompView = React.memo((props: Props) => {
   }: {
     changedRecords : Array<Record<string,any>>
   }) => {
-    const updatedData = [ ...data ] as Array<Record<string,any>>;
+    const updatedData = [ ...kanbanData ] as Array<Record<string,any>>;
     changedRecords.forEach((record) => {
       const { id } = record;
       const index = updatedData.findIndex((item: any) => item.id === id);
@@ -284,7 +287,7 @@ export const KanbanCompView = React.memo((props: Props) => {
 
   const handleOk = (dialogData: Record<string, string>) => {
     const { id } = dialogData;
-    const updatedData = [ ...data ];
+    const updatedData = [ ...kanbanData ];
     const index = updatedData.findIndex((item: any) => item.id === id);
     if (index > -1) {
       updatedData[index] = dialogData;
@@ -303,7 +306,7 @@ export const KanbanCompView = React.memo((props: Props) => {
       const cardIndex = dataMap[data.id] || 0;
       return (
         <CardTemplate
-          data={data}
+          data={{...data}}
           cardIndex={cardIndex}
           cardView={childrenProps.cardView}
           cardHeaderStyles={childrenProps.cardHeaderStyles}
@@ -343,7 +346,7 @@ export const KanbanCompView = React.memo((props: Props) => {
                 id="kanban"
                 cssClass="kanban-overview"
                 keyField="status"
-                dataSource={data}
+                dataSource={[...kanbanData]}
                 cardDoubleClick={OnCardDoubleClick}
                 cardClick={(args: CardClickEventArgs) => args.event?.stopPropagation()}
                 swimlaneSettings={{keyField: 'assignee'}}
@@ -373,7 +376,7 @@ export const KanbanCompView = React.memo((props: Props) => {
             </LayoutContainer>
           </ScrollBar>
           <SlotConfigContext.Provider value={{ modalWidth: 600 }}>
-            {childrenProps.cardView.expandModalView}
+            {childrenProps.cardView.cardModalView}
           </SlotConfigContext.Provider>
         </div>
       </div>

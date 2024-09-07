@@ -17,6 +17,7 @@ import {
   NameGenerator,
   JSONValue,
 } from "lowcoder-sdk";
+import React from "react";
 
 type ContainerBaseProps = typeof ContainerBaseProps;
 type ConstructorToView<T> = typeof ConstructorToView;
@@ -26,11 +27,11 @@ type JSONValue = typeof JSONValue;
 
 const ContextSlotControl = withSelectedMultiContext(SlotControl);
 
-const ContainerView = (props: ContainerBaseProps) => {
-  return <InnerGrid {...props} emptyRows={30} autoHeight />;
-};
+const ContainerView = React.memo((props: ContainerBaseProps) => {
+  return <InnerGrid {...props} emptyRows={15} autoHeight />;
+});
 
-function CardView(props: { containerProps: ConstructorToView<typeof SimpleContainerComp> }) {
+const CardView = React.memo((props: { containerProps: ConstructorToView<typeof SimpleContainerComp> }) => {
   const { containerProps } = props;
   // const background = useContext(BackgroundColorContext);
   return (
@@ -43,11 +44,10 @@ function CardView(props: { containerProps: ConstructorToView<typeof SimpleContai
       // bgColor={background}
       items={gridItemCompToGridItems(containerProps.items)}
       hintPlaceholder=""
-      onMouseDown
       // containerPadding={[2, 2]}
     />
   );
-}
+});
 
 let CardViewControlTmp = (function () {
   // const label = trans("table.expandable");
@@ -56,8 +56,8 @@ let CardViewControlTmp = (function () {
       // expandable: BoolControl,
       cardView: ContextSlotControl,
     },
-    () => ({ expandableConfig: {}, expandModalView: null })
-    )
+    () => ({ cardViewConfig: {}, cardModalView: null })
+  )
     .setControlItemData({ filterText: '' })
     .setPropertyViewFn((children, dispatch) => {
       return (
@@ -75,26 +75,21 @@ let CardViewControlTmp = (function () {
 
 export class CardViewControl extends CardViewControlTmp {
   getView() {
-    // if (!this.children.expandable.getView()) {
-    //   return { expandableConfig: {}, expandModalView: null };
-    // }
     const selectedContainer = this.children.cardView.getSelectedComp();
     return {
-      cardViewConfig: {
-        cardTemplate: (data: Record<string, string>, index: number) => {
-          const slotControl = this.children.cardView.getView()(
-            {
-              currentRow: data,
-              currentIndex: index,
-              // currentOriginalIndex: tryToNumber(record[OB_ROW_ORI_INDEX]),
-            },
-            String(index)
-          );
-          const containerProps = slotControl.children.container.getView();
-          return <CardView key={index} containerProps={containerProps} />;
-        },
+      cardTemplate: (data: Record<string, string>, index: number) => {
+        const slotControl = this.children.cardView.getView()(
+          {
+            currentRow: data,
+            currentIndex: index,
+            currentOriginalIndex: index,
+          },
+          String(index)
+        );
+        const containerProps = slotControl.children.container.getView();
+        return <CardView key={index} containerProps={containerProps} />;
       },
-      expandModalView: selectedContainer.getView(),
+      cardModalView: selectedContainer.getView(),
     };
   }
 

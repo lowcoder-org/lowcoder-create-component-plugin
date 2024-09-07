@@ -7,6 +7,7 @@ import {
   withViewFn,
   withPropertyViewFn,
   withMethodExposing,
+  CompAction,
 } from 'lowcoder-sdk';
 import { trans } from "./i18n/comps";
 import { KanbanInitComp } from './kanbanTypes';
@@ -16,6 +17,7 @@ import * as datasource from './datasource.json';
 
 type IContainer = typeof IContainer;
 type NameGenerator = typeof NameGenerator;
+type CompAction = typeof CompAction;
 
 export class KanbanImplComp extends KanbanInitComp implements IContainer {
   private getSlotContainer() {
@@ -43,6 +45,20 @@ export class KanbanImplComp extends KanbanInitComp implements IContainer {
 
   autoHeight(): boolean {
     return this.children.autoHeight.getView();
+  }
+
+  override reduce(action: CompAction): this {
+    let comp = super.reduce(action);
+    const params = comp.children.cardView.children.cardView.getCachedParams('0');
+    if (!Boolean(params)) {
+      comp = comp.setChild(
+        "cardView",
+        comp.children.cardView.reduce(
+          comp.children.cardView.setSelectionAction('0', params)
+        )
+      );
+    }
+    return comp;
   }
 }
 
