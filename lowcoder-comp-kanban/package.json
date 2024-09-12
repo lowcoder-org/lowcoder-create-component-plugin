@@ -15,7 +15,7 @@
     "antd": "^5.19.1",
     "bootstrap": "^5.3.3",
     "lowcoder-cli": "^0.0.30",
-    "lowcoder-sdk": "^2.4.12",
+    "lowcoder-sdk": "^2.4.13",
     "prop-types": "^15.8.1",
     "react": "18",
     "react-bootstrap": "^2.10.2",

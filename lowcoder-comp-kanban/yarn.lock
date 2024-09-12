@@ -2894,7 +2894,7 @@ __metadata:
     antd: ^5.19.1
     bootstrap: ^5.3.3
     lowcoder-cli: ^0.0.30
-    lowcoder-sdk: ^2.4.12
+    lowcoder-sdk: ^2.4.13
     prop-types: ^15.8.1
     react: 18
     react-bootstrap: ^2.10.2
@@ -2905,15 +2905,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"lowcoder-sdk@npm:^2.4.12":
-  version: 2.4.12
-  resolution: "lowcoder-sdk@npm:2.4.12"
+"lowcoder-sdk@npm:^2.4.13":
+  version: 2.4.13
+  resolution: "lowcoder-sdk@npm:2.4.13"
   dependencies:
     prettier: ^3.1.1
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: b4c76fad959ce3d19d9c35bbf8ec15dd22e387f28de2c6f22da3f22c73b7e8cb4e6226247dbbb50dbc32f920ae0b4a9e30ee75230ceb32793c98c719e20c44c8
+  checksum: 8687cdcde4b6be46bd798041738f55c0839d992e5551f0ba9d05f6558873cf4b8550424e6a04e755b9437cfb6b845a56cdfc1b83df500d31dd7ac5b241762d63
   languageName: node
   linkType: hard
 

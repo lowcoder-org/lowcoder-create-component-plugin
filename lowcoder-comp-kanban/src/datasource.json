@@ -1,7 +1,7 @@
 {
   "cardData": [
     {
-      "id": "Task 1",
+      "id": 0,
       "label": "Task - 29001",
       "status": "Open",
       "summary": "Analyze customer requirements.",
@@ -11,7 +11,7 @@
       "assignee": "Nancy Davloio"
     },
     {
-      "id": "Task 2",
+      "id": 1,
       "label": "Task - 29002",
       "status": "InProgress",
       "summary": "Add responsive support to applicaton",

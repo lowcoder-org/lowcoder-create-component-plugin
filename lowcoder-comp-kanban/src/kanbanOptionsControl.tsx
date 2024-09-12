@@ -18,7 +18,7 @@ let KanbanOption = new MultiCompBuilder(
     estimate: NumberControl,
     assignee: StringControl,
     rankId: NumberControl,
-    id: StringControl,
+    id: NumberControl,
   },
   (props: any) => props
 ).build();
@@ -89,4 +89,5 @@ KanbanOption = class extends KanbanOption implements OptionCompProperty {
 export const KanbanOptionControl = optionsControl(KanbanOption, {
   initOptions: dataSource.cardData,
   uniqField: "id",
+  autoIncField: "id",
 });

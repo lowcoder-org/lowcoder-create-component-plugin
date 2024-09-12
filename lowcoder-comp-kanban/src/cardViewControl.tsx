@@ -16,6 +16,7 @@ import {
   RecordType,
   NameGenerator,
   JSONValue,
+  CompActionTypes,
 } from "lowcoder-sdk";
 import React from "react";
 
@@ -28,7 +29,8 @@ type JSONValue = typeof JSONValue;
 const ContextSlotControl = withSelectedMultiContext(SlotControl);
 
 const ContainerView = React.memo((props: ContainerBaseProps) => {
-  return <InnerGrid {...props} emptyRows={15} autoHeight />;
+  console.log('card grid -> ', props);
+  return <InnerGrid {...props} emptyRows={8} autoHeight />;
 });
 
 const CardView = React.memo((props: { containerProps: ConstructorToView<typeof SimpleContainerComp> }) => {
@@ -47,13 +49,28 @@ const CardView = React.memo((props: { containerProps: ConstructorToView<typeof S
       // containerPadding={[2, 2]}
     />
   );
-});
+}, (prev, next) => JSON.stringify(prev.containerProps) === JSON.stringify(next.containerProps));
+
+const cardTemplate = (props: {
+  data: Record<string, string>,
+  index: number,
+  cardView: any,
+}) => {
+  const slotControl = props.cardView.getView()(
+    {
+      currentRow: props.data,
+      currentIndex: props.index,
+      currentOriginalIndex: props.index,
+    },
+    String(props.index)
+  );
+  const containerProps = slotControl.children.container.getView();
+  return <CardView key={`view-${props.index}`} containerProps={containerProps} />
+};
 
 let CardViewControlTmp = (function () {
-  // const label = trans("table.expandable");
   return new ControlItemCompBuilder(
     {
-      // expandable: BoolControl,
       cardView: ContextSlotControl,
     },
     () => ({ cardViewConfig: {}, cardModalView: null })
@@ -65,7 +82,7 @@ let CardViewControlTmp = (function () {
           {children.cardView
             .getSelectedComp()
             .getComp()
-            .propertyView({ buttonText: "Customize" })
+            .propertyView({ buttonText: "Customize Card View" })
           }
         </>
       );
@@ -78,16 +95,12 @@ export class CardViewControl extends CardViewControlTmp {
     const selectedContainer = this.children.cardView.getSelectedComp();
     return {
       cardTemplate: (data: Record<string, string>, index: number) => {
-        const slotControl = this.children.cardView.getView()(
-          {
-            currentRow: data,
-            currentIndex: index,
-            currentOriginalIndex: index,
-          },
-          String(index)
-        );
-        const containerProps = slotControl.children.container.getView();
-        return <CardView key={index} containerProps={containerProps} />;
+        const cardView = this.children.cardView;
+        return cardTemplate({
+          data,
+          index,
+          cardView,
+        });
       },
       cardModalView: selectedContainer.getView(),
     };
@@ -105,6 +118,8 @@ export class CardViewControl extends CardViewControlTmp {
   }
 
   reduce(action: any) {
+    if (action.type === CompActionTypes.CHANGE_VALUE && action.path[action.path.length - 1] === 'positionParams') return this;
+    
     const comp = super.reduce(action);
     // console.info("CardViewControl reduce. action: ", action, "\nthis: ", this, "\ncomp: ", comp);
     return comp;
