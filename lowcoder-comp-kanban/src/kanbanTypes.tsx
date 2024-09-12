@@ -11,11 +11,13 @@ import {
   RecordConstructorToComp,
   RecordConstructorToView,
   dropdownControl,
+  stateComp,
 } from 'lowcoder-sdk';
 import { trans } from "./i18n/comps";
 import { KanbanOptionControl } from './kanbanOptionsControl';
 import { CardViewControl } from './cardViewControl';
 import * as dataSource from "./datasource.json";
+import { JSONObject } from 'i18n/comps/locales/types';
 
 type RecordConstructorToComp<T> = typeof RecordConstructorToComp;
 type RecordConstructorToView<T> = typeof RecordConstructorToView;
@@ -129,6 +131,11 @@ const childrenMap = {
       value: "change",
       description: "Triggers when data changes",
     },
+    {
+      label: "onCardClick",
+      value: "cardClick",
+      description: "Triggers on card click",
+    },
   ] as const),
   cardContentStyles: styleControl(CompStyles),
   statusOptions: jsonControl(toJSONObjectArray, dataSource.statusOptions),
@@ -136,6 +143,8 @@ const childrenMap = {
   cardViewOption: dropdownControl(cardViewOptions, "default"),
   cardView: CardViewControl,
   separateAssigneeSections: withDefault(BoolControl, false),
+  activeCardIndex: stateComp<number>(0),
+  activeCardData: stateComp<JSONObject>({}),
 };
 
 export const KanbanInitComp = (function () {

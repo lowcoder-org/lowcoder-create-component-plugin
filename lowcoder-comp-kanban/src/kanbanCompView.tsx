@@ -99,6 +99,7 @@ const CardTemplate = React.memo((props: {
   cardHeaderStyles: Record<string, string>;
   cardContentStyles: Record<string, string>;
   tagStyles: Record<string, string>;
+  onClick: () => void;
 }) => {
   const template = useMemo(() => {
     return props.cardView.cardTemplate(
@@ -112,13 +113,33 @@ const CardTemplate = React.memo((props: {
   ]);
 
   if (props.isEditorStateAvailable && props.cardViewOption === 'custom') {
-    return template;
+    return (
+      <Wrapper>
+        <div
+          className={'card-template'}
+          onMouseDown={() => {
+            props.onClick();
+          }}
+          style={{
+            backgroundColor: props.cardContentStyles.backgroundColor,
+            borderRadius: props.cardContentStyles.radius,
+            borderWidth: props.cardContentStyles.borderWidth,
+            border: props.cardContentStyles.border,
+          }}
+        >
+          {template}   
+        </div>
+      </Wrapper>
+    );
   }
 
   return (
     <Wrapper>
       <div
         className={'card-template'}
+        onMouseDown={() => {
+          props.onClick();
+        }}
         style={{
           backgroundColor: props.cardContentStyles.backgroundColor,
           borderRadius: props.cardContentStyles.radius,
@@ -327,6 +348,11 @@ export const KanbanCompView = React.memo((props: Props) => {
         cardHeaderStyles={childrenProps.cardHeaderStyles}
         cardContentStyles={childrenProps.cardContentStyles}
         tagStyles={childrenProps.tagStyles}
+        onClick={() => {
+          comp.children.activeCardIndex.dispatchChangeValueAction(cardIndex);
+          comp.children.activeCardData.dispatchChangeValueAction(childrenProps.data[cardIndex]);
+          childrenProps.onEvent("cardClick");
+        }}
       />
     );
   }, [
@@ -358,7 +384,9 @@ export const KanbanCompView = React.memo((props: Props) => {
               keyField="status"
               dataSource={[...kanbanData]}
               cardDoubleClick={OnCardDoubleClick}
-              cardClick={(args: CardClickEventArgs) => args.event?.stopPropagation()}
+              cardClick={(args: CardClickEventArgs) => {
+                args.event?.stopPropagation();
+              }}
               swimlaneSettings={
                 {keyField: childrenProps.separateAssigneeSections ? 'assignee' : ''}
               }

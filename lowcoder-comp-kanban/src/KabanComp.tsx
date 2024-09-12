@@ -8,6 +8,7 @@ import {
   withPropertyViewFn,
   withMethodExposing,
   CompAction,
+  CompDepsConfig,
 } from 'lowcoder-sdk';
 import { trans } from "./i18n/comps";
 import { KanbanInitComp } from './kanbanTypes';
@@ -137,4 +138,26 @@ KanbanPropertyComp = withMethodExposing(KanbanPropertyComp, [
 export default withExposingConfigs(KanbanPropertyComp, [
   new NameConfig("data", trans("component.data")),
   NameConfigHidden,
+  new CompDepsConfig(
+    "activeCardIndex",
+    (comp) => {
+      return {
+        activeCardIndex: comp.children.activeCardIndex.node(),
+      };
+    },
+    (input) => {
+      return input.activeCardIndex;
+    },
+  ),
+  new CompDepsConfig(
+    "activeCardData",
+    (comp) => {
+      return {
+        activeCardData: comp.children.activeCardData.node(),
+      };
+    },
+    (input) => {
+      return input.activeCardData;
+    },
+  ),
 ]);
