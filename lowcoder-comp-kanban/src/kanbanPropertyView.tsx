@@ -23,8 +23,17 @@ export const KanbanPropertyView = React.memo((props: Props) => {
           label: 'Assignee Options'
         })}
       </Section>
-      <Section name="Card View">
-        {children.cardView.getPropertyView()}
+      <Section name="Customization">
+        {children.separateAssigneeSections.propertyView({
+          label: "Separate Sections By Assignees",
+        })}
+        {children.cardViewOption.propertyView({
+          label: "Card View",
+          radioButton: true,
+        })}
+        {children.cardViewOption.getView() === 'custom' && 
+          children.cardView.getPropertyView()
+        }
       </Section>  
       <Section name="Interaction">
         {children.onEvent.propertyView()}

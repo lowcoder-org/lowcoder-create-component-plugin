@@ -10,6 +10,7 @@ import {
   uiChildren,
   RecordConstructorToComp,
   RecordConstructorToView,
+  dropdownControl,
 } from 'lowcoder-sdk';
 import { trans } from "./i18n/comps";
 import { KanbanOptionControl } from './kanbanOptionsControl';
@@ -104,9 +105,19 @@ export const BoardStyles = [
   },
 ] as const;
 
+const cardViewOptions = [
+  {
+    label: "Default",
+    value: "default",
+  },
+  {
+    label: "Custom",
+    value: "custom",
+  },
+] as const;
 
 const childrenMap = {
-  autoHeight: withDefault(AutoHeightControl, "fixed"),
+  autoHeight: withDefault(AutoHeightControl, "auto"),
   cardHeaderStyles: styleControl(CardHeaderStyles),
   tagStyles: styleControl(TagStyles),
   boardStyles: styleControl(BoardStyles),
@@ -116,13 +127,15 @@ const childrenMap = {
     {
       label: "onChange",
       value: "change",
-      description: "Triggers when Chart data changes",
+      description: "Triggers when data changes",
     },
   ] as const),
   cardContentStyles: styleControl(CompStyles),
   statusOptions: jsonControl(toJSONObjectArray, dataSource.statusOptions),
   assigneeOptions: jsonControl(toJSONObjectArray, dataSource.assigneeOptions),
+  cardViewOption: dropdownControl(cardViewOptions, "default"),
   cardView: CardViewControl,
+  separateAssigneeSections: withDefault(BoolControl, false),
 };
 
 export const KanbanInitComp = (function () {

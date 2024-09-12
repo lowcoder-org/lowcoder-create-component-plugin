@@ -21,15 +21,15 @@ type CompAction = typeof CompAction;
 
 export class KanbanImplComp extends KanbanInitComp implements IContainer {
   private getSlotContainer() {
-    return this.children.cardView.children.cardView.getSelectedComp().getComp().children.container;
+    return this.children.cardView?.children?.cardView?.getSelectedComp()?.getComp()?.children?.container;
   }
 
   findContainer(key: string) {
-    return this.getSlotContainer().findContainer(key);
+    return this.getSlotContainer()?.findContainer(key);
   }
 
   getCompTree() {
-    return this.getSlotContainer().getCompTree();
+    return this.getSlotContainer()?.getCompTree();
   }
 
   getPasteValue(nameGenerator: NameGenerator) {
