@@ -29,7 +29,6 @@ type JSONValue = typeof JSONValue;
 const ContextSlotControl = withSelectedMultiContext(SlotControl);
 
 const ContainerView = React.memo((props: ContainerBaseProps) => {
-  console.log('card grid -> ', props);
   return <InnerGrid {...props} emptyRows={8} autoHeight />;
 });
 

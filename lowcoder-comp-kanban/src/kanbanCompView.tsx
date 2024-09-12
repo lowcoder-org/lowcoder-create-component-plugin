@@ -6,6 +6,7 @@ import {
   styled,
   ScrollBar,
   SlotConfigContext,
+  getPanelStatus,
 } from "lowcoder-sdk";
 import { extend, addClass, registerLicense } from "@syncfusion/ej2-base";
 import {
@@ -50,6 +51,7 @@ const LayoutContainer = styled.div<{
 `;
 
 const getString = (assignee: string): string => {
+  if (!Boolean(assignee)) return '';
   return (assignee.match(/\b(\w)/g) as string[]).join("").toUpperCase();
 };
 
@@ -78,6 +80,7 @@ const cardRendered = (props: {
   cardContentStyles: Record<string, string>,
 }): void => {
   let val: string = (props.args.data as { [key: string]: Object }).priority as string;
+  if (!Boolean(val)) return;
   let cardElement = props.args.element as HTMLElement;
   cardElement.style.backgroundColor = props.cardContentStyles.backgroundColor;
   cardElement.style.borderRadius = props.cardContentStyles.radius;
@@ -88,6 +91,8 @@ const cardRendered = (props: {
 };
 
 const CardTemplate = React.memo((props: {
+  isEditorStateAvailable: boolean;
+  cardViewOption: string;
   data: { [key: string]: string },
   cardIndex: number;
   cardView: any;
@@ -95,16 +100,18 @@ const CardTemplate = React.memo((props: {
   cardContentStyles: Record<string, string>;
   tagStyles: Record<string, string>;
 }) => {
-  const editorState = useContext(EditorContext);
-
   const template = useMemo(() => {
     return props.cardView.cardTemplate(
       props.data,
       props.cardIndex,
     )
-  }, [JSON.stringify(props.data), props.cardIndex]);
+  }, [
+    JSON.stringify(props.data),
+    props.cardIndex,
+    // props.cardView.cardTemplate,
+  ]);
 
-  if (editorState) {
+  if (props.isEditorStateAvailable && props.cardViewOption === 'custom') {
     return template;
   }
 
@@ -164,6 +171,8 @@ const CardTemplate = React.memo((props: {
       </div>
     </Wrapper>
   );
+}, (prev, next) => {
+  return JSON.stringify(prev) === JSON.stringify(next)
 });
 
 type Props = {
@@ -177,26 +186,27 @@ export const KanbanCompView = React.memo((props: Props) => {
   //   [childrenToProps, comp.children],
   // );
   const childrenProps = childrenToProps(comp.children);
+  const panelStatus = getPanelStatus();
   
+  const editorState = useContext(EditorContext);
   const [dataMap, setDataMap] = useState<Record<string, number>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dialogData, setDialogData] = useState<Record<string,string>>({});
 
+  const isEditorStateAvailable = useMemo(() => Boolean(editorState), [ editorState ]);
+  const cardView = useMemo(() => comp.children.cardView.children.cardView.toJsonValue(), [comp.children.cardView]);
+  const cardModal = useMemo(() => childrenProps.cardView.cardModalView, [childrenProps.cardView.cardModalView] )
   const updateDataMap = useCallback(() => {
     const mapData: Record<string, number> = {};
     childrenProps.data?.forEach((item: any, index: number) => {
-      mapData[item.id] = index;
+      mapData[`${item.id}`] = index;
     })
     setDataMap(mapData);
-  }, [ setDataMap]);
+  }, [ JSON.stringify(childrenProps.data), setDataMap]);
 
   useEffect(() => {
     updateDataMap();
   }, [updateDataMap]);
-
-  useEffect(() => {
-    updateDataMap();
-  }, [JSON.stringify(childrenProps.data), updateDataMap]);
 
   const kanbanData: Object[] = useMemo(() => extend(
       [],
@@ -221,7 +231,11 @@ export const KanbanCompView = React.memo((props: Props) => {
   }, [setDialogData, showModal]);
 
   const assigneeOptions = useMemo(() => {
-    let assignees: any = [];
+    let assignees: any = [{
+      label: 'Unassigned',
+      value: '',
+      key: 'unassigned',
+    }];
     childrenProps.assigneeOptions.forEach((item: any) => {
       let assignee = {
         label: item.name,
@@ -256,7 +270,7 @@ export const KanbanCompView = React.memo((props: Props) => {
     return uniqueObjectsArray;
   }, [JSON.stringify(childrenProps.statusOptions)]);
 
-  const handleDataChange = (kanbanData: Array<Record<string,any>>) => {
+  const handleDataChange = useCallback((kanbanData: Array<Record<string,any>>) => {
     comp.children?.data.children.manual.children.manual.dispatch(
       comp.children?.data.children.manual.children.manual.setChildrensAction(
         kanbanData
@@ -267,15 +281,15 @@ export const KanbanCompView = React.memo((props: Props) => {
     );
     
     childrenProps.onEvent("change");
-  };
+  }, [comp, childrenProps.onEvent]);
 
-  const handleActionComplete = ({
+  const handleActionComplete = useCallback(({
     changedRecords,
   }: {
     changedRecords : Array<Record<string,any>>
   }) => {
     const updatedData = [ ...kanbanData ] as Array<Record<string,any>>;
-    changedRecords.forEach((record) => {
+    changedRecords?.forEach((record) => {
       const { id } = record;
       const index = updatedData.findIndex((item: any) => item.id === id);
       if (index > -1) {
@@ -283,9 +297,9 @@ export const KanbanCompView = React.memo((props: Props) => {
       }
     });
     handleDataChange(updatedData);
-  }
+  }, [kanbanData, handleDataChange]);
 
-  const handleOk = (dialogData: Record<string, string>) => {
+  const handleOk = useCallback((dialogData: Record<string, string>) => {
     const { id } = dialogData;
     const updatedData = [ ...kanbanData ];
     const index = updatedData.findIndex((item: any) => item.id === id);
@@ -294,101 +308,129 @@ export const KanbanCompView = React.memo((props: Props) => {
       handleDataChange(updatedData);
     }
     setIsModalOpen(false);
-  }
+  }, [kanbanData, setIsModalOpen, handleDataChange])
   
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setIsModalOpen(false);
-  }
+  }, [setIsModalOpen])
 
-  const cardSettings = useMemo(() => ({
-    headerField: 'label',
-    template: (data: Record<string, string>) => {
-      const cardIndex = dataMap[data.id] || 0;
-      return (
-        <CardTemplate
-          data={{...data}}
-          cardIndex={cardIndex}
-          cardView={childrenProps.cardView}
-          cardHeaderStyles={childrenProps.cardHeaderStyles}
-          cardContentStyles={childrenProps.cardContentStyles}
-          tagStyles={childrenProps.tagStyles}
-        />
-      );
-    },
-  }), [
-    dataMap,
-    childrenProps.cardView,
-    childrenProps.cardHeaderStyles,
-    childrenProps.cardContentStyles,
-    childrenProps.tagStyles,
+  const cardTemplate = useCallback((data: Record<string, string>) => {
+    const cardIndex = dataMap[data.id] || 0;
+    return (
+      <CardTemplate
+        key={data.id}
+        isEditorStateAvailable={isEditorStateAvailable}
+        cardViewOption={childrenProps.cardViewOption}
+        data={data}
+        cardIndex={cardIndex}
+        cardView={childrenProps.cardView}
+        cardHeaderStyles={childrenProps.cardHeaderStyles}
+        cardContentStyles={childrenProps.cardContentStyles}
+        tagStyles={childrenProps.tagStyles}
+      />
+    );
+  }, [
+    cardView,
+    childrenProps.cardViewOption,
+    isEditorStateAvailable,
+    JSON.stringify(panelStatus),
+    JSON.stringify(dataMap),
+    JSON.stringify(childrenProps.cardHeaderStyles),
+    JSON.stringify(childrenProps.cardContentStyles),
+    JSON.stringify(childrenProps.tagStyles),
+  ]);
+
+  const renderKanbanComp = useMemo(() => {
+    return (
+      <ScrollBar
+        style={{
+          height: childrenProps.autoHeight ? 'auto' : '100%',
+          margin: '0px',
+          padding: '0px',
+        }}
+        hideScrollbar={!childrenProps.scrollbars}
+      >
+        <LayoutContainer>
+          {Boolean(Object.keys(dataMap).length) && (
+            <KanbanComponent
+              id="kanban"
+              cssClass="kanban-overview"
+              keyField="status"
+              dataSource={[...kanbanData]}
+              cardDoubleClick={OnCardDoubleClick}
+              cardClick={(args: CardClickEventArgs) => args.event?.stopPropagation()}
+              swimlaneSettings={
+                {keyField: childrenProps.separateAssigneeSections ? 'assignee' : ''}
+              }
+              actionComplete={handleActionComplete}
+              cardSettings={{
+                headerField: 'label',
+                template: cardTemplate,
+              }}
+              cardRendered={(args: CardRenderedEventArgs) => {
+                return cardRendered({
+                  args,
+                  cardContentStyles: childrenProps.cardContentStyles,
+                })
+              }}
+            >
+              <ColumnsDirective>
+                {childrenProps.statusOptions.map((statusOption: any) => (
+                  <ColumnDirective
+                    key={statusOption.value}
+                    headerText={statusOption.label}
+                    keyField={statusOption.value}
+                    allowToggle={true}
+                    template={(data: Record<string, string>) => (
+                      <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
+                    )}
+                  />
+                ))}
+              </ColumnsDirective>
+            </KanbanComponent>
+          )}
+        </LayoutContainer>
+      </ScrollBar>
+  )}, [
+    cardTemplate,
+    JSON.stringify(dataMap),
+    JSON.stringify(kanbanData),
+    JSON.stringify(childrenProps.statusOptions),
+    JSON.stringify(childrenProps.cardContentStyles),
+    JSON.stringify(childrenProps.boardStyles),
+    childrenProps.autoHeight,
+    childrenProps.separateAssigneeSections,
+    OnCardDoubleClick,
+    handleActionComplete,
+  ]);
+
+  const renderKanbanModal = useMemo(() => (
+    <KanbanCardModal
+      open={isModalOpen}
+      data={dialogData}
+      statusOptions={statusOptions}
+      assigneeOptions={assigneeOptions}
+      onOk={(data) => handleOk(data)}
+      onCancel={handleCancel}
+    />
+  ), [
+    isModalOpen,
+    dialogData,
+    JSON.stringify(statusOptions),
+    JSON.stringify(assigneeOptions),
+    handleOk,
+    handleCancel,
   ]);
 
   return (
     <>
-      <div
-        className="schedule-control-section"
-        style={{height: `100%`, width: `100%`}}
-      >
-        <div
-          className="col-lg-12 control-section"
-          style={{height: `100%`, width: `100%`}}
-        >
-          <ScrollBar
-            style={{
-              height: childrenProps.autoHeight ? 'auto' : '100%',
-              margin: '0px',
-              padding: '0px',
-            }}
-            hideScrollbar={!childrenProps.scrollbars}
-          >
-            <LayoutContainer>
-              <KanbanComponent
-                id="kanban"
-                cssClass="kanban-overview"
-                keyField="status"
-                dataSource={[...kanbanData]}
-                cardDoubleClick={OnCardDoubleClick}
-                cardClick={(args: CardClickEventArgs) => args.event?.stopPropagation()}
-                swimlaneSettings={{keyField: 'assignee'}}
-                actionComplete={handleActionComplete}
-                cardSettings={cardSettings}
-                cardRendered={(args: CardRenderedEventArgs) => {
-                  return cardRendered({
-                    args,
-                    cardContentStyles: childrenProps.cardContentStyles,
-                  })
-                }}
-              >
-                <ColumnsDirective>
-                  {childrenProps.statusOptions.map((statusOption: any) => (
-                    <ColumnDirective
-                      key={statusOption.value}
-                      headerText={statusOption.label}
-                      keyField={statusOption.value}
-                      allowToggle={true}
-                      template={(data: Record<string, string>) => (
-                        <ColumnTemplate data={data} boardStyles={childrenProps.boardStyles} />
-                      )}
-                    />
-                  ))}
-                </ColumnsDirective>
-              </KanbanComponent>
-            </LayoutContainer>
-          </ScrollBar>
-          <SlotConfigContext.Provider value={{ modalWidth: 600 }}>
-            {childrenProps.cardView.cardModalView}
-          </SlotConfigContext.Provider>
-        </div>
-      </div>
-
-      <KanbanCardModal
-        open={isModalOpen}
-        data={dialogData}
-        statusOptions={statusOptions}
-        assigneeOptions={assigneeOptions}
-        onOk={(data) => handleOk(data)}
-        onCancel={handleCancel}
-      />
+      { renderKanbanComp }
+      <SlotConfigContext.Provider value={{ modalWidth: 600 }}>
+        {cardModal}
+      </SlotConfigContext.Provider>
+      { renderKanbanModal}
     </>
   );
+}, (prev, next) =>  {
+  return prev.comp.toJsonValue() === next.comp.toJsonValue();
 });
