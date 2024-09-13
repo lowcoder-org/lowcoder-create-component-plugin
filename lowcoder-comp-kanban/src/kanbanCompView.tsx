@@ -117,7 +117,7 @@ const CardTemplate = React.memo((props: {
       <Wrapper>
         <div
           className={'card-template'}
-          onMouseDown={() => {
+          onClick={() => {
             props.onClick();
           }}
           style={{
@@ -137,7 +137,7 @@ const CardTemplate = React.memo((props: {
     <Wrapper>
       <div
         className={'card-template'}
-        onMouseDown={() => {
+        onClick={() => {
           props.onClick();
         }}
         style={{
