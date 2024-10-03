@@ -40,9 +40,9 @@ const LayoutContainer = styled.div<{
   $radius?: string;
 }>`
   height: ${(props: any) => (props.$autoHeight ? "auto" : "100%")};
+  width:"100%";
 
   overflow: auto;
-  overflow: ${(props: any) => props.$overflow ?? "overlay"};
   ${(props: any) =>
     props.$autoHeight &&
     `::-webkit-scrollbar {
@@ -225,9 +225,29 @@ export const KanbanCompView = React.memo((props: Props) => {
     setDataMap(mapData);
   }, [ JSON.stringify(childrenProps.data), setDataMap]);
 
+  const createKanbanStyle = (minWidth: string) => {
+    if (minWidth) {
+      let style = document.getElementById('kanban-style');
+      if (style) {
+        style.remove();
+      }
+      style = document.createElement('style');
+      style.setAttribute('id', 'kanban-style');
+      style.setAttribute('type', 'text/css');
+      style.innerHTML = `td.e-content-cells, th.e-header-cells {
+        width: ${minWidth};
+      }`;
+      document.getElementsByTagName('head')[0].appendChild(style);
+    };
+  };
+
   useEffect(() => {
     updateDataMap();
   }, [updateDataMap]);
+
+  useEffect(() => {
+    createKanbanStyle(childrenProps.minCardWidth);
+  }, [childrenProps.minCardWidth]);
 
   const kanbanData: Object[] = useMemo(() => extend(
       [],
@@ -374,6 +394,7 @@ export const KanbanCompView = React.memo((props: Props) => {
           margin: '0px',
           padding: '0px',
         }}
+        overflow="scroll"
         hideScrollbar={!childrenProps.scrollbars}
       >
         <LayoutContainer>

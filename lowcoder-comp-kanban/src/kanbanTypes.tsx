@@ -12,6 +12,7 @@ import {
   RecordConstructorToView,
   dropdownControl,
   stateComp,
+  RadiusControl,
 } from 'lowcoder-sdk';
 import { trans } from "./i18n/comps";
 import { KanbanOptionControl } from './kanbanOptionsControl';
@@ -125,6 +126,7 @@ const childrenMap = {
   boardStyles: styleControl(BoardStyles),
   data: KanbanOptionControl,
   scrollbars: withDefault(BoolControl, false),
+  minCardWidth: withDefault(RadiusControl, ""),
   onEvent: eventHandlerControl([
     {
       label: "onChange",

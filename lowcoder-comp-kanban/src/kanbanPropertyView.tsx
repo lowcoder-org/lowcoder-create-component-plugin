@@ -44,6 +44,10 @@ export const KanbanPropertyView = React.memo((props: Props) => {
           children.scrollbars.propertyView({
             label: trans("prop.scrollbar"),
           })}
+        {children.minCardWidth.propertyView({
+            label: trans("style.minCardWidth"),
+            placeholder: '250px',
+          })}
       </Section>
       <Section name="Card Header Styling">
         {children.cardHeaderStyles.getPropertyView()}
