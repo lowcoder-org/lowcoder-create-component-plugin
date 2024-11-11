@@ -1,6 +1,6 @@
 {
   "name": "create-lowcoder-plugin",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "bin": "./index.js",
   "type": "module",
   "dependencies": {

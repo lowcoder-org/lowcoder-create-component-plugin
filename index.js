@@ -152,6 +152,11 @@ async function createProject(projectName, options) {
     "@types/react",
     "@types/react-dom",
     "vite",
+    "prop-types",
+    "react-resize-detector",
+    "@observablehq/runtime",
+    "@observablehq/inspector",
+    "@observablehq/stdlib",
   ]);
 
   await executeNodeScript(
