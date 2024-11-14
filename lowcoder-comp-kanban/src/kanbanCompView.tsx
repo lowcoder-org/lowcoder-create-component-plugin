@@ -3,11 +3,13 @@ import { KanbanImplComp } from "./KabanComp";
 import {
   EditorContext,
   childrenToProps,
-  styled,
   ScrollBar,
   SlotConfigContext,
   getPanelStatus,
+  DragIcon,
+  TextEditIcon,
 } from "lowcoder-sdk";
+import styled from "styled-components";
 import { extend, addClass, registerLicense } from "@syncfusion/ej2-base";
 import {
   KanbanComponent,
@@ -25,12 +27,9 @@ registerLicense(
 );
 
 const Wrapper = styled.div<{}>`
+  position: relative;
   height: 100%;
   width: 100%;
-  .e-card {
-    background-color: red !important;
-    font-size: 52px !important;
-  }
 `;
 
 const LayoutContainer = styled.div<{
@@ -48,6 +47,49 @@ const LayoutContainer = styled.div<{
     `::-webkit-scrollbar {
     display: none;
   }`}
+
+  .e-card-wrapper {
+    padding-top: 24px !important;
+  }
+
+  .e-card {
+    overflow: visible;
+  }
+`;
+
+const StyledEditIcon = styled(TextEditIcon)`
+  g g {
+    fill: #ffffff;
+  }
+`;
+
+const StyledDragIcon = styled(DragIcon)`
+  g g {
+    fill: #ffffff;
+  }
+`;
+
+const CardActions = styled.div`
+  display: flex;
+  position: absolute;
+  top: -20px;
+  right: 0;
+  line-height: 16px;
+  font-size: 12px;
+  background: #3377ff;
+  color: white;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+
+  .editAction {
+    padding: 2px 6px;
+    border-right: 1px solid white;
+    cursor: pointer;
+  }
+
+  .dragAction {
+    padding: 2px 6px;
+  }
 `;
 
 const getString = (assignee: string): string => {
@@ -100,7 +142,9 @@ const CardTemplate = React.memo((props: {
   cardContentStyles: Record<string, string>;
   tagStyles: Record<string, string>;
   onClick: () => void;
+  onEdit: () => void;
 }) => {
+  const [hover, setHover] = useState(false);
   const template = useMemo(() => {
     return props.cardView.cardTemplate(
       props.data,
@@ -134,7 +178,25 @@ const CardTemplate = React.memo((props: {
   }
 
   return (
-    <Wrapper>
+    <Wrapper
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      {hover && (
+        <CardActions>
+          <div
+            className="editAction"
+            onClick={props.onEdit}
+          >
+            <StyledEditIcon />
+            <span>Edit</span>
+          </div>
+          <div className="dragAction">
+            <StyledDragIcon />
+            <span>Drag</span>
+          </div>
+        </CardActions>
+      )}
       <div
         className={'card-template'}
         onClick={() => {
@@ -271,6 +333,15 @@ export const KanbanCompView = React.memo((props: Props) => {
     }, 100)
   }, [setDialogData, showModal]);
 
+  const handleOnEdit = useCallback((data: any): void => {
+    setDialogData({
+      ...data,
+    });
+    setTimeout(() => {
+      showModal();
+    }, 100)
+  }, [setDialogData, showModal]);
+
   const assigneeOptions = useMemo(() => {
     let assignees: any = [{
       label: 'Unassigned',
@@ -373,6 +444,9 @@ export const KanbanCompView = React.memo((props: Props) => {
           comp.children.activeCardData.dispatchChangeValueAction(childrenProps.data[cardIndex]);
           childrenProps.onEvent("cardClick");
         }}
+        onEdit={() => {
+          handleOnEdit(childrenProps.data[cardIndex]);
+        }}
       />
     );
   }, [
@@ -404,7 +478,7 @@ export const KanbanCompView = React.memo((props: Props) => {
               cssClass="kanban-overview"
               keyField="status"
               dataSource={[...kanbanData]}
-              cardDoubleClick={OnCardDoubleClick}
+              // cardDoubleClick={OnCardDoubleClick}
               cardClick={(args: CardClickEventArgs) => {
                 args.event?.stopPropagation();
               }}
@@ -449,7 +523,7 @@ export const KanbanCompView = React.memo((props: Props) => {
     JSON.stringify(childrenProps.boardStyles),
     childrenProps.autoHeight,
     childrenProps.separateAssigneeSections,
-    OnCardDoubleClick,
+    // OnCardDoubleClick,
     handleActionComplete,
   ]);
 
