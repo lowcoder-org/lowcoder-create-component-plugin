@@ -26,10 +26,14 @@ registerLicense(
   "ORg4AjUWIQA/Gnt2UFhhQlJBfV5AQmBIYVp/TGpJfl96cVxMZVVBJAtUQF1hTX5Vd0ViX3pfdXRRR2VY"
 );
 
-const Wrapper = styled.div<{}>`
+const Wrapper = styled.div<{
+  $bgColor?: string;
+}>`
   position: relative;
   height: 100%;
   width: 100%;
+  overflow: hidden;
+  ${(props) => props.$bgColor && `background: ${props.$bgColor};`}
 `;
 
 const LayoutContainer = styled.div<{
@@ -37,9 +41,10 @@ const LayoutContainer = styled.div<{
   $autoHeight?: boolean;
   $overflow?: string;
   $radius?: string;
+  $padding?: string;
 }>`
   height: ${(props: any) => (props.$autoHeight ? "auto" : "100%")};
-  width:"100%";
+  width: 100%;
 
   overflow: auto;
   ${(props: any) =>
@@ -52,43 +57,67 @@ const LayoutContainer = styled.div<{
     padding-top: 24px !important;
   }
 
-  .e-card {
-    overflow: visible;
-  }
-`;
-
-const StyledEditIcon = styled(TextEditIcon)`
-  g g {
-    fill: #ffffff;
-  }
-`;
-
-const StyledDragIcon = styled(DragIcon)`
-  g g {
-    fill: #ffffff;
-  }
+  ${(props) => props.$padding && `
+    .e-kanban .e-kanban-content .e-content-row .e-content-cells .e-card-wrapper .e-card {
+      .card-template {
+        .e-card-header {
+          padding-left: 0;
+          padding-right: 0;
+        }
+        .e-card-content {
+          padding-left: 0;
+          padding-right: 0;
+        }
+        .e-card-custom-footer {
+          padding-left: 0;
+          padding-right: 0;
+        }
+      }
+    }
+  `}
 `;
 
 const CardActions = styled.div`
   display: flex;
+  justify-content: space-between;
   position: absolute;
-  top: -20px;
+  top: 0;
   right: 0;
+  width: 100%;
   line-height: 16px;
-  font-size: 12px;
-  background: #3377ff;
-  color: white;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
+  font-size: 14px;
+  padding: 12px 0px;
+  box-shadow: 0 2px 6px 2px rgba(0, 0, 0, 0.15), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  background: #f5f5f7;
+  align-items: center;
+  z-index: 999;
 
   .editAction {
-    padding: 2px 6px;
-    border-right: 1px solid white;
+    padding: 2px 8px;
     cursor: pointer;
+    color: #3377ff;
+    font-weight: 500;
   }
 
   .dragAction {
+    font-weight: bold;
     padding: 2px 6px;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+
+    svg {
+      min-width: 20px;
+      height: 20px;
+    }
+
+    span {
+      width: 100%;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
   }
 `;
 
@@ -158,20 +187,41 @@ const CardTemplate = React.memo((props: {
 
   if (props.isEditorStateAvailable && props.cardViewOption === 'custom') {
     return (
-      <Wrapper>
+      <Wrapper
+        $bgColor={props.cardContentStyles.backgroundColor}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
+        {hover && (
+          <CardActions>
+            <div className="dragAction">
+              <DragIcon />
+              <span>{props.data.label}</span>
+            </div>
+            <div
+              className="editAction"
+              onClick={props.onEdit}
+            >
+              <span>Edit</span>
+            </div>
+          </CardActions>
+        )}
         <div
           className={'card-template'}
           onClick={() => {
             props.onClick();
           }}
           style={{
-            backgroundColor: props.cardContentStyles.backgroundColor,
             borderRadius: props.cardContentStyles.radius,
             borderWidth: props.cardContentStyles.borderWidth,
             border: props.cardContentStyles.border,
+            padding: props.cardContentStyles.padding,
+            margin: props.cardContentStyles.margin,
+            fontSize: props.cardContentStyles.textSize,
+            overflow: 'hidden',
           }}
         >
-          {template}   
+          {template}
         </div>
       </Wrapper>
     );
@@ -179,21 +229,21 @@ const CardTemplate = React.memo((props: {
 
   return (
     <Wrapper
+      $bgColor={props.cardContentStyles.backgroundColor}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
       {hover && (
         <CardActions>
+          <div className="dragAction">
+            <DragIcon />
+            <span>{props.data.label}</span>
+          </div>
           <div
             className="editAction"
             onClick={props.onEdit}
           >
-            <StyledEditIcon />
             <span>Edit</span>
-          </div>
-          <div className="dragAction">
-            <StyledDragIcon />
-            <span>Drag</span>
           </div>
         </CardActions>
       )}
@@ -203,10 +253,13 @@ const CardTemplate = React.memo((props: {
           props.onClick();
         }}
         style={{
-          backgroundColor: props.cardContentStyles.backgroundColor,
           borderRadius: props.cardContentStyles.radius,
           borderWidth: props.cardContentStyles.borderWidth,
           border: props.cardContentStyles.border,
+          padding: props.cardContentStyles.padding,
+          margin: props.cardContentStyles.margin,
+          fontSize: props.cardContentStyles.textSize,
+          overflow: 'hidden',
         }}
       >
         <div className="e-card-header">
@@ -227,10 +280,6 @@ const CardTemplate = React.memo((props: {
             className="e-text"
             style={{
               fontSize: props.cardContentStyles.textSize,
-              color: props.cardContentStyles.text,
-              padding: props.cardContentStyles.padding,
-              margin: props.cardContentStyles.margin,
-              borderWidth: props.cardContentStyles.borderWidth,
             }}
           >
             {props.data.summary}
@@ -279,6 +328,8 @@ export const KanbanCompView = React.memo((props: Props) => {
   const isEditorStateAvailable = useMemo(() => Boolean(editorState), [ editorState ]);
   const cardView = useMemo(() => comp.children.cardView.children.cardView.toJsonValue(), [comp.children.cardView]);
   const cardModal = useMemo(() => childrenProps.cardView.cardModalView, [childrenProps.cardView.cardModalView] )
+  const onEventVal = useMemo(() => comp?.toJsonValue()?.onEvent, [comp]);
+
   const updateDataMap = useCallback(() => {
     const mapData: Record<string, number> = {};
     childrenProps.data?.forEach((item: any, index: number) => {
@@ -445,6 +496,10 @@ export const KanbanCompView = React.memo((props: Props) => {
           childrenProps.onEvent("cardClick");
         }}
         onEdit={() => {
+          if (onEventVal && onEventVal.some((e: any) => e.name === 'onEdit')) {
+            childrenProps.onEvent('onEdit');
+            return;
+          }
           handleOnEdit(childrenProps.data[cardIndex]);
         }}
       />
@@ -458,6 +513,7 @@ export const KanbanCompView = React.memo((props: Props) => {
     JSON.stringify(childrenProps.cardHeaderStyles),
     JSON.stringify(childrenProps.cardContentStyles),
     JSON.stringify(childrenProps.tagStyles),
+    onEventVal,
   ]);
 
   const renderKanbanComp = useMemo(() => {
@@ -471,7 +527,9 @@ export const KanbanCompView = React.memo((props: Props) => {
         overflow="scroll"
         hideScrollbar={!childrenProps.scrollbars}
       >
-        <LayoutContainer>
+        <LayoutContainer
+          $padding={childrenProps.cardContentStyles.padding}
+        >
           {Boolean(Object.keys(dataMap).length) && (
             <KanbanComponent
               id="kanban"
@@ -489,6 +547,7 @@ export const KanbanCompView = React.memo((props: Props) => {
               cardSettings={{
                 headerField: 'label',
                 template: cardTemplate,
+                selectionType: 'Single',
               }}
               cardRendered={(args: CardRenderedEventArgs) => {
                 return cardRendered({

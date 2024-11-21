@@ -138,6 +138,11 @@ const childrenMap = {
       value: "cardClick",
       description: "Triggers on card click",
     },
+    {
+      label: "onEdit",
+      value: "onEdit",
+      description: "Customize edit action",
+    },
   ] as const),
   cardContentStyles: styleControl(CompStyles),
   statusOptions: jsonControl(toJSONObjectArray, dataSource.statusOptions),
