@@ -132,7 +132,42 @@ KanbanPropertyComp = withMethodExposing(KanbanPropertyComp, [
       );
     },
   },
-
+  {
+    method: {
+      name: "clearInsertedItems",
+      description: "Clear Inserted Items",
+      params: [],
+    },
+    execute: (comp: any) => {
+      comp.children?.insertedItems.dispatch(
+        comp.children?.insertedItems.changeValueAction([])
+      );
+    },
+  },
+  {
+    method: {
+      name: "clearUpdatedItems",
+      description: "Clear Updated Items",
+      params: [],
+    },
+    execute: (comp: any) => {
+      comp.children?.updatedItems.dispatch(
+        comp.children?.updatedItems.changeValueAction([])
+      );
+    },
+  },
+  {
+    method: {
+      name: "clearDeletedItems",
+      description: "Clear Deleted Items",
+      params: [],
+    },
+    execute: (comp: any) => {
+      comp.children?.deletedItems.dispatch(
+        comp.children?.deletedItems.changeValueAction([])
+      );
+    },
+  },
 ]);
 
 export default withExposingConfigs(KanbanPropertyComp, [
@@ -158,6 +193,50 @@ export default withExposingConfigs(KanbanPropertyComp, [
     },
     (input) => {
       return input.activeCardData;
+    },
+  ),
+  new CompDepsConfig(
+    "initialData",
+    (comp) => {
+      return {
+        initialData: comp.children.initialData.node(),
+      };
+    },
+    (input) => {
+      return input.initialData;
+    },
+  ),
+  new CompDepsConfig(
+    "toUpdatedItems",
+    (comp) => {
+      return {
+        updatedItems: comp.children.updatedItems.node(),
+      };
+    },
+    (input) => {
+      return input.updatedItems;
+    },
+  ),
+  new CompDepsConfig(
+    "toInsertedItems",
+    (comp) => {
+      return {
+        insertedItems: comp.children.insertedItems.node(),
+      };
+    },
+    (input) => {
+      return input.insertedItems;
+    },
+  ),
+  new CompDepsConfig(
+    "toDeletedItems",
+    (comp) => {
+      return {
+        deletedItems: comp.children.deletedItems.node(),
+      };
+    },
+    (input) => {
+      return input.deletedItems;
     },
   ),
 ]);

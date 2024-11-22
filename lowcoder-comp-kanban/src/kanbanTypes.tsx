@@ -152,6 +152,10 @@ const childrenMap = {
   separateAssigneeSections: withDefault(BoolControl, false),
   activeCardIndex: stateComp<number>(0),
   activeCardData: stateComp<JSONObject>({}),
+  initialData: stateComp<JSONObject>({}),
+  updatedItems: stateComp<JSONObject>({}),
+  insertedItems: stateComp<JSONObject>({}),
+  deletedItems: stateComp<JSONObject>({}),
 };
 
 export const KanbanInitComp = (function () {

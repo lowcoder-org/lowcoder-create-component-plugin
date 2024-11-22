@@ -8,7 +8,13 @@ import {
   getPanelStatus,
   DragIcon,
   TextEditIcon,
+  deferAction,
 } from "lowcoder-sdk";
+import differenceWith from "lodash.differencewith";
+import differenceBy from "lodash.differenceby";
+import isEqual from "lodash.isequal";
+import filter from "lodash.filter";
+import includes from "lodash.includes";
 import styled from "styled-components";
 import { extend, addClass, registerLicense } from "@syncfusion/ej2-base";
 import {
@@ -322,8 +328,10 @@ export const KanbanCompView = React.memo((props: Props) => {
   
   const editorState = useContext(EditorContext);
   const [dataMap, setDataMap] = useState<Record<string, number>>({});
+  const [initDataMap, setInitDataMap] = useState<Record<string, number>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dialogData, setDialogData] = useState<Record<string,string>>({});
+  const initData = useRef<boolean>(false);
 
   const isEditorStateAvailable = useMemo(() => Boolean(editorState), [ editorState ]);
   const cardView = useMemo(() => comp.children.cardView.children.cardView.toJsonValue(), [comp.children.cardView]);
@@ -336,9 +344,28 @@ export const KanbanCompView = React.memo((props: Props) => {
       mapData[`${item.id}`] = index;
     })
     setDataMap(mapData);
+
+    if (initData.current) {
+      const difference = differenceWith(childrenProps.data, childrenProps.initialData, isEqual);
+      const inserted = differenceBy(difference, Object.keys(initDataMap)?.map(id => ({ id: parseInt(id) })), 'id')
+      const updated = filter(difference, obj => includes(Object.keys(initDataMap), String(obj.id)));
+      const deleted = differenceBy(childrenProps.initialData, Object.keys(mapData)?.map(id => ({ id: parseInt(id) })), 'id')
+
+      comp.children?.updatedItems.dispatchChangeValueAction(updated);
+      comp.children?.insertedItems.dispatchChangeValueAction(inserted);
+      comp.children?.deletedItems.dispatchChangeValueAction(deleted);
+    }
+
+    if (!initData.current && childrenProps.data?.length) {
+      setInitDataMap(mapData);
+      comp.children?.initialData.dispatch(
+        comp.children?.initialData.changeValueAction([...childrenProps.data])
+      );
+      initData.current = true;
+    }
   }, [ JSON.stringify(childrenProps.data), setDataMap]);
 
-  const createKanbanStyle = (minWidth: string) => {
+  const createKanbanStyle = useCallback((minWidth: string) => {
     if (minWidth) {
       let style = document.getElementById('kanban-style');
       if (style) {
@@ -352,7 +379,7 @@ export const KanbanCompView = React.memo((props: Props) => {
       }`;
       document.getElementsByTagName('head')[0].appendChild(style);
     };
-  };
+  }, []);
 
   useEffect(() => {
     updateDataMap();
@@ -360,7 +387,7 @@ export const KanbanCompView = React.memo((props: Props) => {
 
   useEffect(() => {
     createKanbanStyle(childrenProps.minCardWidth);
-  }, [childrenProps.minCardWidth]);
+  }, [childrenProps.minCardWidth, createKanbanStyle]);
 
   const kanbanData: Object[] = useMemo(() => extend(
       [],

@@ -9,11 +9,20 @@
     "@syncfusion/ej2-kanban": "^26.1.40",
     "@syncfusion/ej2-material3-theme": "^26.1.35",
     "@syncfusion/ej2-react-kanban": "^25.2.6",
+    "@types/lodash.differenceby": "^4.8.9",
+    "@types/lodash.filter": "^4.6.9",
+    "@types/lodash.includes": "^4.3.9",
+    "@types/lodash.isequal": "^4.5.8",
     "@types/prop-types": "^15.7.12",
     "@types/react": "18",
     "@types/react-dom": "18",
     "antd": "^5.19.1",
     "bootstrap": "^5.3.3",
+    "lodash.differenceby": "^4.8.0",
+    "lodash.differencewith": "^4.5.0",
+    "lodash.filter": "^4.6.0",
+    "lodash.includes": "^4.3.0",
+    "lodash.isequal": "^4.5.0",
     "lowcoder-cli": "^0.0.30",
     "lowcoder-sdk": "^2.4.16",
     "prop-types": "^15.8.1",
@@ -44,5 +53,8 @@
     "start": "vite",
     "build": "lowcoder-cli build",
     "build_publish": "lowcoder-cli build --publish"
+  },
+  "devDependencies": {
+    "@types/lodash.differencewith": "^4.5.9"
   }
 }
