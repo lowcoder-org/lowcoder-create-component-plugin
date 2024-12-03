@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { Gantt, Task, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
@@ -24,10 +24,13 @@ import {
   jsonValueExposingStateControl,
   EditorContext,
   CompNameContext,
+  stateComp,
+  JSONObject,
+  CompDepsConfig,
   // useMergeCompStyles,
 } from 'lowcoder-sdk';
 import { i18nObjs, trans } from "./i18n/comps";
-import _ from 'lodash'
+import _, { differenceBy, differenceWith, filter, includes, isEqual } from 'lodash'
 import {isValid} from "date-fns"
 export enum DEP_TYPE {
   CONTRAST_TEXT = 'contrastText',
@@ -535,6 +538,10 @@ let GanttChartCompBase = (function () {
       { label: trans("events.handleSelectLabel"), value: "handleSelect", description: trans("events.handleSelectDesc") },
       { label: trans("events.handleTaskUpdateLabel"), value: "handleTaskUpdate", description: trans("events.handleTaskUpdateDesc") },
     ]),
+    initialData: stateComp<JSONObject>({}),
+    updatedTasks: stateComp<JSONObject>({}),
+    insertedTasks: stateComp<JSONObject>({}),
+    deletedTasks: stateComp<JSONObject>({}),
   };
 
   return new UICompBuilder(childrenMap, (props: {
@@ -556,38 +563,69 @@ let GanttChartCompBase = (function () {
     rowHeight: number;
     handleWidth: number;
     arrowIndent: number;
+    initialData: Task[];
   }, dispatch: any) => {
     const { activeViewMode } = props;
     const [tasks, setTasks] = useState<Task[]>(props.data ?? []);
     const [dimensions, setDimensions] = useState({ width: 480, height: 300 });
     const [previousData, setPreviousData] = useState<Task[]>(props?.data);
-    // useMergeCompStyles(props as Record<string, any>, dispatch);
-const comp = useContext(EditorContext)?.getUICompByName(
-  useContext(CompNameContext)
-);
+    const [initDataMap, setInitDataMap] = useState<Record<string, number>>({});
+    const initData = useRef<boolean>(false);
+
+    const comp = useContext(EditorContext)?.getUICompByName(
+      useContext(CompNameContext)
+    );
+
     const {ref: conRef } = useResizeDetector({});
 
     useEffect(() => {
-      if (!_.isEqual(previousData, props.data)) {
-          //stops unnecessary props.data re-render
-          if (tasks.length === 0) {
-            //handle map mode
-            if (props.data.length > 0) {
-              setTasks(props.data);
-              setPreviousData(props.data);
-            }
-          } else if (!_.isEqual(props.data, tasks)) {
-            //detect any change in data
-            setTasks(props.data); //pass updated data to gantt chart
+      if (!isEqual(previousData, props.data)) {
+        //stops unnecessary props.data re-render
+        if (tasks.length === 0) {
+          //handle map mode
+          if (props.data.length > 0) {
+            setTasks(props.data);
             setPreviousData(props.data);
           }
+        } else if (!isEqual(props.data, tasks)) {
+          //detect any change in data
+          setTasks(props.data); //pass updated data to gantt chart
+          setPreviousData(props.data);
         }
-    }, [props.data])
+      }
+    }, [JSON.stringify(props.data)]);
+
+    useEffect(() => {
+      console.log(props.data);
+      const mapData: Record<string, number> = {};
+      props.data?.forEach((item: any, index: number) => {
+        mapData[`${item.id}`] = index;
+      })
+
+      if (initData.current) {
+        const difference = differenceWith(props.data, props.initialData, isEqual);
+        const inserted = differenceBy(difference, Object.keys(initDataMap)?.map(id => ({ id })), 'id')
+        const updated = filter(difference, obj => includes(Object.keys(initDataMap), String(obj.id)));
+        const deleted = differenceBy(props.initialData, Object.keys(mapData)?.map(id => ({ id })), 'id')
+
+        comp?.children?.comp.children?.updatedTasks.dispatchChangeValueAction(updated);
+        comp?.children?.comp.children?.insertedTasks.dispatchChangeValueAction(inserted);
+        comp?.children?.comp.children?.deletedTasks.dispatchChangeValueAction(deleted);
+      }
+
+      if (!initData.current && props.data?.length && comp?.children?.comp?.children?.initialData) {
+        setInitDataMap(mapData);
+        comp?.children?.comp?.children?.initialData?.dispatch?.(
+          comp?.children?.comp?.children?.initialData?.changeValueAction?.([...props.data])
+        );
+        initData.current = true;
+      }
+    }, [JSON.stringify(props.data), comp?.children?.comp?.children?.initialData])
 
     const updateGanttTasks = (newTasks: Task[], taskId: string) => {
       setTasks(newTasks);
-      comp?.children.comp.children?.data.children.manual.children.manual.dispatch(
-        comp?.children.comp.children?.data.children.manual.children.manual.setChildrensAction(
+      comp?.children?.comp.children?.data.children.manual.children.manual.dispatch(
+        comp?.children?.comp.children?.data.children.manual.children.manual.setChildrensAction(
           newTasks
         )
       );
@@ -690,15 +728,44 @@ const comp = useContext(EditorContext)?.getUICompByName(
               trans("component.name"),
               trans("component.start"),
               trans("component.end"),
-              props.legendWidth, props.legendHeaderStyle?.fontFamily, props.legendHeaderStyle?.textSize, props.legendHeaderStyle?.padding, props.legendHeaderStyle?.headerBackground, props.legendHeaderStyle?.textColor, props.showLegendTable, props.showHeaders)}
-            TaskListTable={createTaskListLocal(false, handleClick, (date) => date.toLocaleDateString(), props.legendWidth, props.legendStyle?.fontFamily, props.legendStyle?.textSize, props.legendStyle?.padding, props.legendStyle?.headerBackground, props.legendStyle?.textColor, props.showLegendTable)}
+              props.legendWidth,
+              props.legendHeaderStyle?.fontFamily,
+              props.legendHeaderStyle?.textSize,
+              props.legendHeaderStyle?.padding,
+              props.legendHeaderStyle?.headerBackground,
+              props.legendHeaderStyle?.textColor,
+              props.showLegendTable,
+              props.showHeaders,
+            )}
+            TaskListTable={createTaskListLocal(
+              false,
+              handleClick,
+              (date) => date.toLocaleDateString(),
+              props.legendWidth,
+              props.legendStyle?.fontFamily,
+              props.legendStyle?.textSize,
+              props.legendStyle?.padding,
+              props.legendStyle?.headerBackground,
+              props.legendStyle?.textColor,
+              props.showLegendTable,
+            )}
             TooltipContent={createTooltip(
               trans("component.startDate"),
               trans("component.endDate"),
               trans("component.progress"),
               trans("component.duration"),
               trans("component.days"),
-              false, (date) => date.toLocaleDateString(), props.tooltipStyle?.fontFamily, props.tooltipStyle?.textSize, props.tooltipStyle?.padding, props.tooltipStyle?.radius, props.tooltipStyle?.headerBackground, props.tooltipStyle?.textColor, props.tooltipStyle?.borderWidth, props.tooltipStyle?.borderColor)}
+              false,
+              (date) => date.toLocaleDateString(),
+              props.tooltipStyle?.fontFamily,
+              props.tooltipStyle?.textSize,
+              props.tooltipStyle?.padding,
+              props.tooltipStyle?.radius,
+              props.tooltipStyle?.headerBackground,
+              props.tooltipStyle?.textColor,
+              props.tooltipStyle?.borderWidth,
+              props.tooltipStyle?.borderColor,
+            )}
         />
         ) : (
           <></>
@@ -828,9 +895,78 @@ GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
       );
     },
   },
+  {
+    method: {
+      name: "clearUpdatedTasks",
+      detail: "Clear updated tasks list",
+      params: [],
+    },
+    execute: (comp) => {
+      comp?.children?.updatedTasks.dispatch(
+        comp?.children?.updatedTasks.changeValueAction([])
+      );
+    }
+  },
+  {
+    method: {
+      name: "clearInsertedTasks",
+      detail: "Clear inserted tasks list",
+      params: [],
+    },
+    execute: (comp) => {
+      comp?.children?.insertedTasks.dispatch(
+        comp?.children?.insertedTasks.changeValueAction([])
+      );
+    }
+  },
+  {
+    method: {
+      name: "clearDeletedTasks",
+      detail: "Clear deleted tasks list",
+      params: [],
+    },
+    execute: (comp) => {
+      comp?.children?.deletedTasks.dispatch(
+        comp?.children?.deletedTasks.changeValueAction([])
+      );
+    }
+  },
 ]);
 
 export default withExposingConfigs(GanttChartCompBase, [
   new NameConfig("data", trans("component.data")),
   NameConfigHidden,
+  new CompDepsConfig(
+    "toUpdatedTasks",
+    (comp) => {
+      return {
+        updatedTasks: comp.children.updatedTasks.node(),
+      };
+    },
+    (input) => {
+      return input.updatedTasks;
+    },
+  ),
+  new CompDepsConfig(
+    "toInsertedTasks",
+    (comp) => {
+      return {
+        insertedTasks: comp.children.insertedTasks.node(),
+      };
+    },
+    (input) => {
+      return input.insertedTasks;
+    },
+  ),
+  new CompDepsConfig(
+    "toDeletedTasks",
+    (comp) => {
+      return {
+        deletedTasks: comp.children.deletedTasks.node(),
+      };
+    },
+    (input) => {
+      return input.deletedTasks;
+    },
+  ),
 ]);
