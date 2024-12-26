@@ -48,7 +48,8 @@ const CardView = React.memo((props: { containerProps: ConstructorToView<typeof S
       // containerPadding={[2, 2]}
     />
   );
-}, (prev, next) => JSON.stringify(prev.containerProps) === JSON.stringify(next.containerProps));
+// }, (prev, next) => JSON.stringify(prev.containerProps) === JSON.stringify(next.containerProps));
+});
 
 const cardTemplate = (props: {
   data: Record<string, string>,

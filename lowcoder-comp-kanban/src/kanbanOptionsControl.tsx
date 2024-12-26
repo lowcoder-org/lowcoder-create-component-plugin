@@ -3,6 +3,7 @@ import {
   StringControl,
   NumberControl,
   optionsControl,
+  withDefault,
 } from 'lowcoder-sdk';
 import * as dataSource from "./datasource.json";
 
@@ -10,7 +11,7 @@ let KanbanOption = new MultiCompBuilder(
   {
     label: StringControl,
     // Title: StringControl,
-    status: StringControl,
+    status: withDefault(StringControl, 'Open'),
     summary: StringControl,
     type: StringControl,
     priority: StringControl,
