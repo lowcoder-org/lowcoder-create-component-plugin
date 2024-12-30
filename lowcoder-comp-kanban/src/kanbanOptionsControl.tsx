@@ -24,7 +24,7 @@ let KanbanOption = new MultiCompBuilder(
   (props: any) => props
 ).build();
 
-type OptionPropertyParam = {
+export type OptionPropertyParam = {
   label?: string;
   // Title?: string;
   status?: string;

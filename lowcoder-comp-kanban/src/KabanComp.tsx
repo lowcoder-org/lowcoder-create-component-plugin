@@ -51,7 +51,6 @@ export class KanbanImplComp extends KanbanInitComp implements IContainer {
   }
 
   override reduce(action: CompAction): this {
-    console.log('KanbanComp -> reduce', action);
     let comp = super.reduce(action);
 
     let dataChanged = false;
@@ -79,39 +78,11 @@ export class KanbanImplComp extends KanbanInitComp implements IContainer {
         )
       );
     }
-    // const thisSelection = this.children.activeCardIndex.getView() ?? "0";
-    // const newSelection = comp.children.activeCardIndex.getView() ?? "0";
-    // const selectionChanged = thisSelection !== newSelection;
-
-    // let params = comp.children.cardView.children.cardView.getCachedParams(newSelection);
-    // if (selectionChanged || !Boolean(params)) {  
-    //   params = !Boolean(params) ? {
-    //     currentRow: comp.children.data.getView()[newSelection],
-    //     currentIndex: newSelection,
-    //     currentOriginalIndex: newSelection,
-    //   } : undefined;
-    //   comp = comp.setChild(
-    //     "cardView",
-    //     comp.children.cardView.reduce(
-    //       comp.children.cardView.setSelectionAction(newSelection, params)
-    //     )
-    //   );
-    // }
-    // const params = comp.children.cardView.children.cardView.getCachedParams('0');
-    // if (!Boolean(params)) {
-    //   comp = comp.setChild(
-    //     "cardView",
-    //     comp.children.cardView.reduce(
-    //       comp.children.cardView.setSelectionAction('0', params)
-    //     )
-    //   );
-    // }
     return comp;
   }
 }
 
 const KanbanRenderComp = withViewFn(KanbanImplComp, (comp: KanbanImplComp) => {
-  console.log('withViewFn')
   return <KanbanCompView comp={comp} />
 });
 let KanbanPropertyComp = withPropertyViewFn(KanbanRenderComp, (comp: KanbanImplComp) => {
