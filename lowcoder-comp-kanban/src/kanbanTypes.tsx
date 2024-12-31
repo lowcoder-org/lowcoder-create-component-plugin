@@ -121,9 +121,9 @@ const cardViewOptions = [
 
 const childrenMap = {
   autoHeight: withDefault(AutoHeightControl, "auto"),
-  cardHeaderStyles: styleControl(CardHeaderStyles),
-  tagStyles: styleControl(TagStyles),
-  boardStyles: styleControl(BoardStyles),
+  cardHeaderStyles: styleControl(CardHeaderStyles, 'cardHeaderStyles'),
+  tagStyles: withDefault(styleControl(TagStyles, 'tagStyles'), {textSize: '12px'}),
+  boardStyles: styleControl(BoardStyles, 'boardStyles'),
   data: KanbanOptionControl,
   scrollbars: withDefault(BoolControl, false),
   minCardWidth: withDefault(RadiusControl, ""),
@@ -144,7 +144,7 @@ const childrenMap = {
       description: "Customize edit action",
     },
   ] as const),
-  cardContentStyles: styleControl(CompStyles),
+  cardContentStyles: withDefault(styleControl(CompStyles, 'cardContentStyles'), {padding: '10px'}),
   statusOptions: jsonControl(toJSONObjectArray, dataSource.statusOptions),
   assigneeOptions: jsonControl(toJSONObjectArray, dataSource.assigneeOptions),
   cardViewOption: dropdownControl(cardViewOptions, "default"),

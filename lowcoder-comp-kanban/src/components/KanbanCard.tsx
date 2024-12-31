@@ -9,7 +9,7 @@ import {
   EditorContext,
   DragIcon,
 } from "lowcoder-sdk";
-import { useContext, useMemo, useState } from "react";
+import { CSSProperties, useContext, useMemo, useState } from "react";
 import { OptionPropertyParam } from "../kanbanOptionsControl";
 import styled from "styled-components";
 
@@ -216,6 +216,7 @@ export const FieldItem = ({
   ]);
 
   const style = {
+    position: 'relative',
     overflow: 'hidden',
     backgroundColor: cardContentStyles.backgroundColor,
     borderRadius: cardContentStyles.radius,
@@ -237,7 +238,7 @@ export const FieldItem = ({
       navigator.maxTouchPoints > 0
         ? "manipulation"
         : "none"
-  };
+  } as React.CSSProperties;
   
   const cardTemplate = useMemo(() => {
     return isEditorStateAvailable && cardViewOption === 'custom'
@@ -291,7 +292,7 @@ export const FieldItem = ({
             <Col>
               {Boolean(item.assignee) && (
                 <Space align="center">
-                  <Avatar key={item.assignee}>
+                  <Avatar key={item.assignee} style={{height: '26px', width: '26px'}}>
                     {item.assignee?.charAt(0)}
                   </Avatar>
                 </Space>
