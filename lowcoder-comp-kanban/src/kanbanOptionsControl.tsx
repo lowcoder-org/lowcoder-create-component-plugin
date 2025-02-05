@@ -46,6 +46,9 @@ KanbanOption = class extends KanbanOption implements OptionCompProperty {
   propertyView(param: any) {
     return (
       <>
+        {this.children.id.propertyView({
+          label: "Id",
+        })}
         {this.children.label.propertyView({
           label: "Label",
         })}
