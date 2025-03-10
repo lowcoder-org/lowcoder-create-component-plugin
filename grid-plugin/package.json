@@ -1,0 +1,41 @@
+{
+  "name": "grid-plugin-demo",
+  "version": "0.0.7",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@observablehq/inspector": "^5.0.1",
+    "@observablehq/runtime": "^6.0.0",
+    "@observablehq/stdlib": "^5.8.8",
+    "@types/react": "18",
+    "@types/react-dom": "18",
+    "lowcoder-cli": "^0.0.30",
+    "lowcoder-sdk": "^2.6.4",
+    "prop-types": "^15.8.1",
+    "react": "18",
+    "react-dom": "18",
+    "react-resize-detector": "^12.0.2",
+    "typescript": "5.8.2",
+    "vite": "^6.2.1"
+  },
+  "lowcoder": {
+    "description": "A Demo Hillchart Component Plugin",
+    "comps": {
+      "basicInnerGridComp": {
+        "name": "Basic Inner Grid Comp",
+        "icon": "./icons/hills.svg",
+        "description": "Basic Inner Grid Comp Plugin Demo",
+        "layoutInfo": {
+          "w": 10,
+          "h": 40,
+          "delayCollision": true
+        }
+      }
+    }
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "lowcoder-cli build",
+    "build_publish": "lowcoder-cli build --publish"
+  }
+}
