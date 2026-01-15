@@ -596,7 +596,6 @@ let GanttChartCompBase = (function () {
     }, [JSON.stringify(props.data)]);
 
     useEffect(() => {
-      console.log(props.data);
       const mapData: Record<string, number> = {};
       props.data?.forEach((item: any, index: number) => {
         mapData[`${item.id}`] = index;
@@ -845,7 +844,7 @@ GanttChartCompBase = withMethodExposing(GanttChartCompBase, [
       ],
     },
     execute: (comp: any, values: any[]) => {
-      const newTasks = values;
+      const newTasks = values[0];
       comp.children?.data.children.manual.children.manual.dispatch(
         comp.children?.data.children.manual.children.manual.setChildrensAction(
           newTasks
