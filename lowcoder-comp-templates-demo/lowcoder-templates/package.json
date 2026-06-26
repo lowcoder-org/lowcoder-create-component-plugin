@@ -1,0 +1,92 @@
+{
+  "name": "lowcoder-comp-template-demos",
+  "version": "0.0.3",
+  "private": false,
+  "type": "module",
+  "description": "Lowcoder layout templates — fixed React chrome + SDK drop-zones",
+  "scripts": {
+    "start": "NODE_OPTIONS=--max_old_space_size=6144 vite",
+    "dev": "NODE_OPTIONS=--max_old_space_size=6144 vite",
+    "build": "lowcoder-cli build",
+    "build_publish": "lowcoder-cli build --publish"
+  },
+  "lowcoder": {
+    "description": "Pre-built layout templates with drop zones for Lowcoder components",
+    "comps": {
+      "dashboardTemplate": {
+        "name": "Dashboard Template",
+        "icon": "./icons/dashboard.svg",
+        "description": "Navbar, stat cards, and a main content drop-zone",
+        "isContainer": true,
+        "layoutInfo": {
+          "w": 24,
+          "h": 80,
+          "delayCollision": true
+        }
+      },
+      "landingPageTemplate": {
+        "name": "Landing Page Template",
+        "icon": "./icons/landing-page.svg",
+        "description": "Hero section, content drop-zone, and footer",
+        "isContainer": true,
+        "layoutInfo": {
+          "w": 24,
+          "h": 80,
+          "delayCollision": true
+        }
+      },
+      "sidebarTemplate": {
+        "name": "Sidebar Layout Template",
+        "icon": "./icons/sidebar.svg",
+        "description": "Sidebar navigation with a main content drop-zone",
+        "isContainer": true,
+        "layoutInfo": {
+          "w": 24,
+          "h": 70,
+          "delayCollision": true
+        }
+      },
+      "cardGridTemplate": {
+        "name": "Card Grid Template",
+        "icon": "./icons/card-grid.svg",
+        "description": "Header, tabs, and a card grid drop-zone",
+        "isContainer": true,
+        "layoutInfo": {
+          "w": 24,
+          "h": 70,
+          "delayCollision": true
+        }
+      },
+      "adminPanelTemplate": {
+        "name": "Admin Panel Template",
+        "icon": "./icons/admin-panel.svg",
+        "description": "Top bar, sidebar, and main admin content drop-zone",
+        "isContainer": true,
+        "layoutInfo": {
+          "w": 24,
+          "h": 80,
+          "delayCollision": true
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "lowcoder-cli": "^0.0.30",
+    "lowcoder-sdk": "^2.7.6",
+    "react": "18.3.0",
+    "react-dom": "18.3.0",
+    "typescript": "^4.8.4",
+    "vite": "^4.5.5"
+  },
+  "keywords": [
+    "lowcoder",
+    "component",
+    "template",
+    "plugin",
+    "dashboard",
+    "layout"
+  ],
+  "license": "MIT"
+}
